@@ -128,6 +128,7 @@ github.com/didip/tollbooth v4.0.2+incompatible h1:fVSa33JzSz0hoh2NxpwZtksAzAgd7z
 github.com/didip/tollbooth v4.0.2+incompatible/go.mod h1:A9b0665CE6l1KmzpDws2++elm/CsuWBMa5Jv4WY0PEY=
 github.com/disintegration/gift v1.1.2/go.mod h1:Jh2i7f7Q2BM7Ezno3PhfezbR1xpUg9dUg3/RlKGr4HI=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
+github.com/dostow/rave v0.0.0-20190824155045-2e1387f7133a/go.mod h1:zMVJUirk2QFJA8tniNBRQqmYUDBjyIhvOhrJD34u/BA=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad h1:Qk76DOWdOp+GlyDKBAG3Klr9cn7N+LcYc82AZ2S7+cA=
@@ -265,6 +266,7 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1/go.mod h1:1NbS8ALrpOvjt0rHPNLyCIeMtbizbir8U//inJ+zuB8=
+github.com/kelseyhightower/envconfig v1.3.0 h1:IvRS4f2VcIQy6j4ORGIf9145T/AsUB+oY8LyvN8BXNM=
 github.com/kelseyhightower/envconfig v1.3.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
@@ -434,6 +436,7 @@ github.com/spf13/viper v1.4.0/go.mod h1:PTJ7Z/lr49W6bUbkmS1V3by4uWynFiR9p7+dSq/y
 github.com/stackimpact/stackimpact-go v2.3.10+incompatible/go.mod h1:Seecan0KCHJ0D5MYjIhx9TddZ0p53TicSrE9sBdovcU=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 h1:JNEGSiWg6D3lcBCMCBqN3ELniXujt+0QNHLhNnO0w3s=
 github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2/go.mod h1:mjqs7N0Q6m5HpR7QfXVBZXZWSqTjQLeTujjA/xUp2uw=
+github.com/streadway/amqp v0.0.0-20190214183023-884228600bc9 h1:wR6aLKdbJ5E8m+NZWkVeT49ExjlqUe0B41zfM5/m44I=
 github.com/streadway/amqp v0.0.0-20190214183023-884228600bc9/go.mod h1:1WNBiOZtZQLpVAyu0iTduoJL9hEsMloAK5XWrtW0xdY=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94 h1:0ngsPmuP6XIjiFRNFYlvKwSr5zff2v+uPHaffZ6/M4k=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=

@@ -10,14 +10,9 @@ require (
 	github.com/go-resty/resty/v2 v2.0.0
 	github.com/jaffee/commandeer v0.1.0
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
-	github.com/osiloke/rave v0.0.0-20190824084923-28bce8356b17 // indirect
 	github.com/tidwall/gjson v1.2.2
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	google.golang.org/api v0.7.0
 )
 
 replace git.progwebtech.com/code/worksmart v1.0.0 => /Users/osiloke/workspace/go/src/git.progwebtech.com/code/worksmart
-
-replace github.com/dostow/rave v1.0.0 => /Users/osiloke/workspace/worksmart_services/rave
-
-replace github.com/osiloke/gostore-contrib v0.0.0-20190628235957-311dc834610c => /Users/osiloke/workspace/go/src/github.com/osiloke/gostore-contrib
