@@ -10,3 +10,8 @@ vendor
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+cmd/rave/.bra.toml
+.env
+rave
+test.go
+.vscode/settings.json
