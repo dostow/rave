@@ -371,9 +371,7 @@ github.com/osiloke/gostore-contrib v0.0.0-20190824092745-3567bbda0025/go.mod h1:
 github.com/osiloke/gostore-contrib v0.0.0-20190824161026-740677b20f65 h1:TZjgRW6C9nxNYyCyRa/JKa55dvouddWGTO09GdPXSoU=
 github.com/osiloke/gostore-contrib v0.0.0-20190824161026-740677b20f65/go.mod h1:HBenJ/opcm3YeLK85K3kCeduhvnM87Byio9NgYPJHfA=
 github.com/osiloke/govaluate v0.0.0-20171009112156-d57f996efa01 h1:OqrJj7RDDOLpyisED+aw83CTeyfxpN2srAHcxoy75GQ=
-github.com/osiloke/govaluate v0.0.0-20171009112156-d57f996efa01/go.mod h1:ebMBR3bPInlUx6LETpaJleiLuety6CS86hkZbeiiC7E=
-github.com/osiloke/rave v0.0.0-20190824084923-28bce8356b17 h1:I+Yh4lfcJXb5XR3C38iiIT8xoaNA09sg354EOmjUlbY=
-github.com/osiloke/rave v0.0.0-20190824084923-28bce8356b17/go.mod h1:bi1nYbjugHSIf6jpDq9gV0p+uaKAMjGFR1rC4gD+x20=
+github.com/osiloke/govaluate v0.0.0-20171009112156-d57f996efa01/go.mod h1:ebMBR3bPInlUx6LETpaJleiLuety6CS86hkZbeiiC7E= 
 github.com/paddycarey/ims v0.0.0-20150610210540-7f2fa762d9bc/go.mod h1:L/S+1/bBI3EqaMXRrZCjSB1iWTSk1e/PjP20uSIKQDc=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
