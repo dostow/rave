@@ -1,10 +1,5 @@
 package worksmart
 
-import (
-	"git.progwebtech.com/code/worksmart/addon"
-	"git.progwebtech.com/code/worksmart/addon/addons"
-)
-
 var addonconfig = `{
 	"name": "rave",
 	"title": "Rave Addon",
@@ -76,6 +71,12 @@ var linkparams = `{
 	"additionalProperties": false
 }`
 
-func init() {
-	addon.Register(addons.NewType("rave", linkparams, addonconfig))
+// AddonRegistrar an addon registrar
+type AddonRegistrar interface {
+	Add(name, config, params string)
+}
+
+// Register injects an addon into a registry
+func Register(ar AddonRegistrar) {
+	ar.Add("rave", addonconfig, linkparams)
 }
