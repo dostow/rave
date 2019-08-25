@@ -1,4 +1,4 @@
-package worksmart
+package plugin
 
 var addonconfig = `{
 	"name": "rave",
