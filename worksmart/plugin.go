@@ -26,6 +26,7 @@ var addonconfig = `{
 			"additionalProperties": false
 		}
 	},
+	"required": ["keys"],
 	"type": "object",
 	"additionalProperties": false
 }`
@@ -70,7 +71,7 @@ var linkparams = `{
 			]
 		}
 	},
-	"required": [],
+	"required": ["callback", "action", "options"],
 	"type": "object",
 	"additionalProperties": false
 }`

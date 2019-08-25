@@ -12,7 +12,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/tidwall/gjson v1.2.2
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	google.golang.org/api v0.7.0
+	google.golang.org/api v0.9.0
 )
 
 replace git.progwebtech.com/code/worksmart v1.0.0 => /Users/osiloke/workspace/go/src/git.progwebtech.com/code/worksmart
