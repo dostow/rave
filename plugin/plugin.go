@@ -32,10 +32,7 @@ var linkparams = `{
 	"title": "Mail Params",
 	"properties": {
 		"callback": {
-			"type": "object",
-			"properties": {
-				"store": {"type": "string"}
-			}
+			"type": "string"
 		},
 		"action": {
 			"type": "string",
@@ -48,8 +45,11 @@ var linkparams = `{
 					"type": "object", 
 					"properties": {
 						"accountNumber": {"type": "string"},
-						"bankCode": {"type": "string"}
-					}
+						"bankCode": {
+							"type": "string"
+						}
+					},
+					"required": ["accountNumber", "bankCode"]
 				},
 				{ 
 					"type": "object", 
