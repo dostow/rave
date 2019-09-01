@@ -5,6 +5,7 @@ go 1.12
 require (
 	firebase.google.com/go v3.8.1+incompatible
 	github.com/RichardKnop/machinery v1.6.9-0.20190819150906-6f7b63c9a5db
+	github.com/apex/log v1.1.1
 	github.com/centrifugal/gocent v0.0.0-20181122112254-dd2b1cb18557
 	github.com/etcd-io/bbolt v1.3.3 // indirect
 	github.com/go-ini/ini v1.46.0 // indirect

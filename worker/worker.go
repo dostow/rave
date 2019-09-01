@@ -7,7 +7,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dostow/rave/api"
+	"github.com/apex/log"
+	"github.com/dostow/rave/api/rave"
 	"github.com/dostow/rave/queues/machinery"
 	"github.com/tidwall/gjson"
 )
@@ -28,8 +29,8 @@ type Params struct {
 	Action   string `json:"action"`
 	Callback string `json:"callback"`
 	Options  struct {
-		AccountNumber string `json:"account"`
-		BankCode      string `json:"bank"`
+		AccountNumber string `json:"accountNumber"`
+		BankCode      string `json:"bankCode"`
 		Amount        string `json:"amount"`
 		Recipient     string `json:"recipient"`
 		Currency      string `json:"currency"`
@@ -50,9 +51,12 @@ type Data struct {
 }
 
 func doRave(addonConfig, addonParams, data, traceID string) error {
+	var err error
+	logger := log.WithField("trace", traceID)
+	defer logger.Trace("doRave").Stop(&err)
 	config := Config{}
 	ctx := context.Background()
-	err := json.Unmarshal([]byte(addonConfig), &config)
+	err = json.Unmarshal([]byte(addonConfig), &config)
 	if err != nil {
 		return err
 	}
@@ -72,7 +76,8 @@ func doRave(addonConfig, addonParams, data, traceID string) error {
 		}
 		accountNumber := gjson.Get(data, options.AccountNumber)
 		accountBank := gjson.Get(data, options.BankCode)
-		_, err := api.CreateTransferRecipient(ctx,
+		logger.WithFields(log.Fields{"account": accountNumber.String(), "bank": accountBank.String()}).Debug("CreateTransferRecipient")
+		_, err := rave.CreateTransferRecipient(ctx,
 			config.Keys.Secret,
 			accountNumber.String(), accountBank.String())
 		// TODO: after creating a transfer recipient, it should be linked to a store entry
@@ -104,7 +109,7 @@ func doRave(addonConfig, addonParams, data, traceID string) error {
 		currency := gjson.Get(data, options.Currency)
 		narration := gjson.Get(data, options.Narration)
 		bankLocation := gjson.Get(data, options.BankLocation)
-		_, err := api.CreateTransfer(ctx,
+		_, err := rave.CreateTransfer(ctx,
 			config.Keys.Secret,
 			reference.String(),
 			amount.String(),
