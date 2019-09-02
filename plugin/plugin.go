@@ -3,7 +3,8 @@ package plugin
 var addonconfig = `{
 	"name": "rave",
 	"title": "Rave Addon",
-	"description": "A
+	"description": "An addon for communicating with flutterwave rave api",
+	"properties": {
 		"apiKey": {"type": "string"},
 		"keys": {
 			"type": "object",
