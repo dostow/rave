@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/apex/log"
 	"github.com/dostow/rave/api/rave"
 	"github.com/dostow/rave/queues/machinery"
+	"github.com/osiloke/dostow-contrib/api"
 	"github.com/tidwall/gjson"
 )
 
@@ -21,7 +23,8 @@ type Keys struct {
 
 // Config addon config
 type Config struct {
-	Keys Keys `json:"keys"`
+	APIKey string `json:"apiKey"`
+	Keys   Keys   `json:"keys"`
 }
 
 // Params linked store params
@@ -48,9 +51,10 @@ type Data struct {
 	Owner      string
 	StoreTitle string
 	StoreID    string `json:"StoreId`
+	StoreName  string `json:"StoreName`
 }
 
-func doRave(addonConfig, addonParams, data, traceID string) error {
+func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) error {
 	var err error
 	logger := log.WithField("trace", traceID)
 	defer logger.Trace("doRave").Stop(&err)
@@ -77,12 +81,29 @@ func doRave(addonConfig, addonParams, data, traceID string) error {
 		accountNumber := gjson.Get(data, options.AccountNumber)
 		accountBank := gjson.Get(data, options.BankCode)
 		logger.WithFields(log.Fields{"account": accountNumber.String(), "bank": accountBank.String()}).Debug("CreateTransferRecipient")
-		_, err := rave.CreateTransferRecipient(ctx,
-			config.Keys.Secret,
-			accountNumber.String(), accountBank.String())
-		// TODO: after creating a transfer recipient, it should be linked to a store entry
-		// a group access key should be provided to this addon
-		// the key would have access rules that allows this addon to modify a store entry
+		if !dry {
+			resp, err := rave.CreateTransferRecipient(ctx,
+				config.Keys.Secret,
+				accountNumber.String(), accountBank.String())
+			if err != nil {
+				return err
+			}
+			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
+				c := api.NewClient(apiURL, config.APIKey)
+				_, err = c.Store.Update(
+					gjson.Get(data, "StoreName").String(),
+					gjson.Get(data, "Data.id").String(),
+					map[string]interface{}{
+						"rave": resp.Data,
+					},
+				)
+				return err
+			}
+			return errors.New("failed creating transfer recipient - " + resp.Message)
+		}
+		log.Debugf(`rave.CreateTransferRecipient(ctx, "%s", "%s", "%s")`, config.Keys.Secret, accountNumber.String(), accountBank.String())
+		log.Debugf(`rave.UpdateStore("%s", "%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String(), accountBank.String())
+		// update store with
 		return err
 	case "createTransfer":
 		if len(options.Amount) == 0 {
@@ -125,17 +146,21 @@ func doRave(addonConfig, addonParams, data, traceID string) error {
 
 // Worker a rave worker that sends messages to centrifuge
 type Worker struct {
-	Addr    string        `help:"centrifuge web address"`
-	Key     string        `help:"centrifuge key"`
-	Timeout time.Duration `help:"gocent timeout"`
-	ID      string        `help:"worker id"`
-	Build   string        `help:"build"`
+	Addr      string        `help:"centrifuge web address"`
+	Key       string        `help:"centrifuge key"`
+	Timeout   time.Duration `help:"gocent timeout"`
+	ID        string        `help:"worker id"`
+	Build     string        `help:"build"`
+	Dry       bool          `help:"dry run"`
+	DostowAPI string        `help:"dostow api url"`
 }
 
 // Run run the worker
 func (w *Worker) Run() error {
 	return machinery.Worker(w.ID, map[string]interface{}{
-		"rave": doRave,
+		"rave": func(args ...string) error {
+			return doRave(w.DostowAPI, args[0], args[1], args[2], args[3], w.Dry)
+		},
 	})
 }
 
@@ -146,5 +171,5 @@ func (w *Worker) Send() error {
 
 // NewWorker new worker
 func NewWorker(build string) *Worker {
-	return &Worker{Timeout: 5 * time.Second, Build: build}
+	return &Worker{Timeout: 5 * time.Second, Build: build, Dry: false}
 }
