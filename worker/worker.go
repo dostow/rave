@@ -94,7 +94,8 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 					gjson.Get(data, "StoreName").String(),
 					gjson.Get(data, "Data.id").String(),
 					map[string]interface{}{
-						"rave": resp.Data,
+						"status": "done",
+						"rave":   resp.Data,
 					},
 				)
 				return err
@@ -102,7 +103,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			return errors.New("failed creating transfer recipient - " + resp.Message)
 		}
 		log.Debugf(`rave.CreateTransferRecipient(ctx, "%s", "%s", "%s")`, config.Keys.Secret, accountNumber.String(), accountBank.String())
-		log.Debugf(`rave.UpdateStore("%s", "%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String(), accountBank.String())
+		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 		// update store with
 		return err
 	case "createTransfer":
