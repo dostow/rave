@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -40,6 +41,7 @@ type Params struct {
 		Reference     string `json:"reference"`
 		Narration     string `json:"narration"`
 		BankLocation  string `json:"bankLocation"`
+		Meta          string `json:"meta"`
 	} `json:"options"`
 }
 
@@ -131,16 +133,49 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		currency := gjson.Get(data, options.Currency)
 		narration := gjson.Get(data, options.Narration)
 		bankLocation := gjson.Get(data, options.BankLocation)
-		_, err := rave.CreateTransfer(ctx,
+		meta := gjson.Get(data, options.Meta)
+
+		metaMap := map[string]interface{}{}
+		if meta.Exists() {
+			for k, v := range meta.Map() {
+				metaMap[k] = v.Value()
+			}
+		}
+		resp, err := rave.CreateTransfer(ctx,
 			config.Keys.Secret,
 			reference.String(),
-			amount.String(),
+			fmt.Sprintf("%v", amount.Int()),
 			recipient.String(),
 			currency.String(),
 			narration.String(),
 			bankLocation.String(),
+			params.Callback,
+			metaMap,
 		)
-		return err
+		if err != nil {
+			return err
+		}
+		if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
+			c := api.NewClient(apiURL, config.APIKey)
+			status := "pending"
+			raveStatus := strings.ToLower(resp.Data.Status)
+			if raveStatus == "successful" {
+				status = "completed"
+			}
+			if raveStatus == "failed" {
+				status = "error"
+			}
+			_, err = c.Store.Update(
+				gjson.Get(data, "StoreName").String(),
+				gjson.Get(data, "Data.id").String(),
+				map[string]interface{}{
+					"status": status,
+					"rave":   resp.Data,
+				},
+			)
+			return err
+		}
+		return errors.New("failed creating transfer recipient - " + resp.Message)
 	}
 	return errors.New("not implemented")
 }

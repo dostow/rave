@@ -82,15 +82,15 @@ func Worker(consumerTag string, workerTasks map[string]interface{}) error {
 	// Here we inject some custom code for error handling,
 	// start and end of task hooks, useful for metrics for example.
 	errorhandler := func(err error) {
-		log.ERROR.Println("I am an error handler:", err)
+		log.ERROR.Println("error:", err)
 	}
 
 	pretaskhandler := func(signature *tasks.Signature) {
-		log.INFO.Println("I am a start of task handler for:", signature.Name)
+		log.INFO.Println("start:", signature.Name)
 	}
 
 	posttaskhandler := func(signature *tasks.Signature) {
-		log.INFO.Println("I am an end of task handler for:", signature.Name)
+		log.INFO.Println("end:", signature.Name)
 	}
 
 	worker.SetPostTaskHandler(posttaskhandler)

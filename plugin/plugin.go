@@ -60,7 +60,8 @@ var linkparams = `{
 						"reference": {"type": "string"},
 						"currency": {"type": "string"},
 						"narration": {"type": "string"},
-						"bankLocation": {"type": "string"}
+						"bankLocation": {"type": "string"},
+						"meta": {"type": "string"}
 					},
 					"required": ["amount", "recipient", "reference", "currency", "narration", "bankLocation"]
 				}
