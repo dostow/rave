@@ -30,7 +30,7 @@ var addonconfig = `{
 // TODO: add jsonschema template format
 var linkparams = `{
 	"name": "params",
-	"title": "Mail Params",
+	"title": "Rave params",
 	"properties": {
 		"callback": {
 			"type": "string"
@@ -61,7 +61,7 @@ var linkparams = `{
 						"currency": {"type": "string"},
 						"narration": {"type": "string"},
 						"bankLocation": {"type": "string"},
-						"meta": {"type": "string"}
+						"meta": {"type": "object"}
 					},
 					"required": ["amount", "recipient", "reference", "currency", "narration", "bankLocation"]
 				}
