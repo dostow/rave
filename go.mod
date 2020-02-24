@@ -7,6 +7,7 @@ require (
 	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/RichardKnop/machinery v1.6.9-0.20190819150906-6f7b63c9a5db
 	github.com/apex/log v1.1.1
+	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/centrifugal/gocent v0.0.0-20181122112254-dd2b1cb18557
 	github.com/dghubble/sling v1.3.0 // indirect
 	github.com/ernesto-jimenez/httplogger v0.0.0-20150224132909-86cc44f6150a // indirect

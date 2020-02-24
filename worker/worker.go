@@ -52,8 +52,8 @@ type Data struct {
 	GroupName  string
 	Owner      string
 	StoreTitle string
-	StoreID    string `json:"StoreId`
-	StoreName  string `json:"StoreName`
+	StoreID    string `json:"StoreId"`
+	StoreName  string `json:"StoreName"`
 }
 
 func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) error {
@@ -176,19 +176,37 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			return err
 		}
 		return errors.New("failed creating transfer recipient - " + resp.Message)
+	case "deleteTransferRecipient":
+		if len(options.Recipient) == 0 {
+			return errors.New("missing recipient template")
+		}
+		recipient := gjson.Get(data, options.Recipient)
+		resp, err := rave.DeleteTransferRecipient(ctx,
+			config.Keys.Secret,
+			recipient.String(),
+		)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
+			c := api.NewClient(apiURL, config.APIKey)
+			_, err = c.Store.Remove(
+				gjson.Get(data, "StoreName").String(),
+				gjson.Get(data, "Data.id").String(),
+			)
+			return err
+		}
 	}
 	return errors.New("not implemented")
 }
 
-// Worker a rave worker that sends messages to centrifuge
+// Worker a worker that communicates with rave
 type Worker struct {
-	Addr      string        `help:"centrifuge web address"`
-	Key       string        `help:"centrifuge key"`
 	Timeout   time.Duration `help:"gocent timeout"`
 	ID        string        `help:"worker id"`
 	Build     string        `help:"build"`
 	Dry       bool          `help:"dry run"`
-	DostowAPI string        `help:"dostow api url"`
+	DostowAPI string        `help:"dostow api url" env:"DOSTOW_API"`
 }
 
 // Run run the worker

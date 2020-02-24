@@ -1,22 +1,27 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/apex/log"
-	"os"
 	"github.com/apex/log/handlers/text"
-	"github.com/jaffee/commandeer"
+	"github.com/caarlos0/env"
 	"github.com/dostow/rave/worker"
+	"github.com/jaffee/commandeer"
 )
 
-var BUILD string = ""
+// BUILD contains build id
+var BUILD string = "dev"
 
-func main() {  
+func main() {
 	log.SetLevel(log.DebugLevel)
-	log.SetHandler(text.New(os.Stderr)) 
-	err := commandeer.Run(worker.NewWorker(BUILD))
+	log.SetHandler(text.New(os.Stderr))
+	w := worker.NewWorker(BUILD)
+	if err := env.Parse(w); err != nil {
+		log.Debugf("%+v", err)
+	}
+	err := commandeer.Run(w)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("%+v", err)
 	}
 }

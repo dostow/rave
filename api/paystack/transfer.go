@@ -28,7 +28,7 @@ type TransferCreatedResult struct {
 		DateCreated      time.Time `json:"date_created"`
 		Currency         string    `json:"currency"`
 		Amount           string    `json:"amount"`
-		Fee              int       `json:"fee"`
+		Fee              float64   `json:"fee"`
 		Status           string    `json:"status"`
 		Reference        string    `json:"reference"`
 		Narration        string    `json:"narration"`
