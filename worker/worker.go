@@ -34,26 +34,28 @@ type Params struct {
 	Callback string `json:"callback"`
 	Options  struct {
 		AccountNumber string `json:"accountNumber"`
-		BankCode      string `json:"bankCode"`
 		Amount        string `json:"amount"`
-		Recipient     string `json:"recipient"`
-		Currency      string `json:"currency"`
-		Reference     string `json:"reference"`
-		Narration     string `json:"narration"`
+		BankCode      string `json:"bankCode"`
 		BankLocation  string `json:"bankLocation"`
+		Currency      string `json:"currency"`
 		Meta          string `json:"meta"`
+		Narration     string `json:"narration"`
+		Recipient     string `json:"recipient"`
+		Reference     string `json:"reference"`
+		Store         string `json:"store"`
+		StoreID       string `json:"storeID"`
 	} `json:"options"`
 }
 
 // Data data from linked store
 type Data struct {
 	Data       map[string]interface{}
-	Method     string
 	GroupName  string
+	Method     string
 	Owner      string
-	StoreTitle string
 	StoreID    string `json:"StoreId"`
 	StoreName  string `json:"StoreName"`
+	StoreTitle string
 }
 
 func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) error {
@@ -79,10 +81,23 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		// If the transfer was successful, update the transfer status
 		//
 		if len(options.Reference) == 0 {
-			return errors.New("missing reference number template")
+			return errors.New("missing reference template")
+		}
+		if len(options.Store) == 0 {
+			return errors.New("missing store template")
+		}
+		if len(options.StoreID) == 0 {
+			return errors.New("missing store ID template")
 		}
 		reference := gjson.Get(data, options.Reference)
-		logger.WithFields(log.Fields{"reference": reference.String()}).Debug("ValidateTransferRequest")
+		storeName := gjson.Get(data, options.Store)
+		storeNameString := ""
+		if storeName.Exists() {
+			storeNameString = storeName.String()
+		} else {
+			storeNameString = options.Store
+		}
+		storeID := gjson.Get(data, options.StoreID)
 		if !dry {
 			log.Debugf(`rave.ValidateTransfer(ctx, "%s", "%s")`, config.Keys.Secret, reference.String())
 			resp, err := rave.GetTransfer(ctx,
@@ -95,20 +110,29 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
 				if len(resp.Data.Transfers) > 0 {
 					transfer := resp.Data.Transfers[0]
+					log.WithField("transfer", transfer.ID).WithField("status", transfer.Status).Debugf("got transfer")
 					updatedData := map[string]interface{}{
 						"rave": transfer,
 					}
 					if strings.Contains(strings.ToLower(transfer.Status), "success") {
 						updatedData["status"] = "done"
-						return err
+						updatedData["transactionStatus"] = 3
 					}
 					c := api.NewClient(apiURL, config.APIKey)
 					log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 					_, err = c.Store.Update(
-						gjson.Get(data, "StoreName").String(),
-						gjson.Get(data, "Data.id").String(),
+						storeNameString,
+						storeID.String(),
 						updatedData,
 					)
+					_, err = c.Store.Update(
+						gjson.Get(data, "StoreName").String(),
+						gjson.Get(data, "Data.id").String(),
+						map[string]interface{}{
+							"status": "done",
+						},
+					)
+					return err
 				}
 			}
 			return errors.New("failed validating transfer - " + resp.Message)

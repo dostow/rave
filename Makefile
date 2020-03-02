@@ -1,7 +1,7 @@
-VERSION := 1.0.1
+VERSION := 1.0.2
 NAME := $(shell echo $${PWD\#\#*/})
 TARGET := ./docker/$(NAME)
-all: clean build image
+all: clean build image scaletag scalepush
 $(TARGET): 
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-s -w" -ldflags="-X main.VERSION=$(VERSION) -X main.BUILD=$(shell git describe --always --long --dirty)" -o $(TARGET) github.com/dostow/rave/cmd/rave
 build: $(TARGET)
