@@ -71,8 +71,50 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 	if err != nil {
 		return err
 	}
+	logger.Debugf("Received %s action", params.Action)
 	options := params.Options
 	switch params.Action {
+	case "validateTransfer":
+		// Get Transfer and then update transfer status
+		// If the transfer was successful, update the transfer status
+		//
+		if len(options.Reference) == 0 {
+			return errors.New("missing reference number template")
+		}
+		reference := gjson.Get(data, options.Reference)
+		logger.WithFields(log.Fields{"reference": reference.String()}).Debug("ValidateTransferRequest")
+		if !dry {
+			log.Debugf(`rave.ValidateTransfer(ctx, "%s", "%s")`, config.Keys.Secret, reference.String())
+			resp, err := rave.GetTransfer(ctx,
+				config.Keys.Secret,
+				reference.String(),
+			)
+			if err != nil {
+				return err
+			}
+			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
+				if len(resp.Data.Transfers) > 0 {
+					transfer := resp.Data.Transfers[0]
+					updatedData := map[string]interface{}{
+						"rave": transfer,
+					}
+					if strings.Contains(strings.ToLower(transfer.Status), "success") {
+						updatedData["status"] = "done"
+						return err
+					}
+					c := api.NewClient(apiURL, config.APIKey)
+					log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+					_, err = c.Store.Update(
+						gjson.Get(data, "StoreName").String(),
+						gjson.Get(data, "Data.id").String(),
+						updatedData,
+					)
+				}
+			}
+			return errors.New("failed validating transfer - " + resp.Message)
+		}
+		// update store with
+		return err
 	case "createTransferRecipient":
 		if len(options.AccountNumber) == 0 {
 			return errors.New("missing account number template")
@@ -127,12 +169,20 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		if len(options.BankLocation) == 0 {
 			return errors.New("missing bank location template")
 		}
+		if len(options.BankCode) == 0 {
+			return errors.New("missing bank location template")
+		}
+		if len(options.AccountNumber) == 0 {
+			return errors.New("missing bank location template")
+		}
 		amount := gjson.Get(data, options.Amount)
 		recipient := gjson.Get(data, options.Recipient)
 		reference := gjson.Get(data, options.Reference)
 		currency := gjson.Get(data, options.Currency)
 		narration := gjson.Get(data, options.Narration)
 		bankLocation := gjson.Get(data, options.BankLocation)
+		bankCode := gjson.Get(data, options.BankCode)
+		accountNumber := gjson.Get(data, options.AccountNumber)
 		meta := gjson.Get(data, options.Meta)
 
 		metaMap := map[string]interface{}{}
@@ -149,10 +199,13 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			currency.String(),
 			narration.String(),
 			bankLocation.String(),
+			accountNumber.String(),
+			bankCode.String(),
 			params.Callback,
 			metaMap,
 		)
 		if err != nil {
+			logger.Errorf("unable to create transfer - %s", err.Error())
 			return err
 		}
 		if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
