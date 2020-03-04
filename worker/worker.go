@@ -150,14 +150,21 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		accountBank := gjson.Get(data, options.BankCode)
 		logger.WithFields(log.Fields{"account": accountNumber.String(), "bank": accountBank.String()}).Debug("CreateTransferRecipient")
 		if !dry {
+			c := api.NewClient(apiURL, config.APIKey)
 			resp, err := rave.CreateTransferRecipient(ctx,
 				config.Keys.Secret,
 				accountNumber.String(), accountBank.String())
 			if err != nil {
+				_, err = c.Store.Update(
+					gjson.Get(data, "StoreName").String(),
+					gjson.Get(data, "Data.id").String(),
+					map[string]interface{}{
+						"status": "error",
+					},
+				)
 				return err
 			}
 			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
-				c := api.NewClient(apiURL, config.APIKey)
 				_, err = c.Store.Update(
 					gjson.Get(data, "StoreName").String(),
 					gjson.Get(data, "Data.id").String(),
