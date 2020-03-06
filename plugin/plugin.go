@@ -37,7 +37,7 @@ var linkparams = `{
 		},
 		"action": {
 			"type": "string",
-			"enum": ["createTransferRecipient", "createTransfer", "validateTransfer"]
+			"enum": ["createTransferRecipient", "createTransfer", "deleteTransferRecipient", "validateTransfer"]
 		},
 		"options": {
 			"type": "object",
