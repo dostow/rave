@@ -201,10 +201,10 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			return errors.New("missing bank location template")
 		}
 		if len(options.BankCode) == 0 {
-			return errors.New("missing bank location template")
+			return errors.New("missing bank code template")
 		}
 		if len(options.AccountNumber) == 0 {
-			return errors.New("missing bank location template")
+			return errors.New("missing account number template")
 		}
 		amount := gjson.Get(data, options.Amount)
 		recipient := gjson.Get(data, options.Recipient)
