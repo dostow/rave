@@ -45,6 +45,8 @@ var linkparams = `{
 				{ 
 					"type": "object", 
 					"properties": {
+						"accountNumber": {"type": "string"},
+						"recipient": {"type": "string"},
 						"reference": {"type": "string"}
 					},
 					"required": ["reference"]
@@ -53,6 +55,7 @@ var linkparams = `{
 					"type": "object", 
 					"properties": {
 						"accountNumber": {"type": "string"},
+						"recipient": {"type": "string"},
 						"bankCode": {
 							"type": "string"
 						}
