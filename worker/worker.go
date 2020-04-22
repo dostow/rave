@@ -270,13 +270,14 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			recipient.String(),
 		)
 		if err != nil {
+			log.WithError(err).Error("failed from rave")
 			return err
 		}
 		if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
 			c := api.NewClient(apiURL, config.APIKey)
 			_, err = c.Store.Remove(
 				gjson.Get(data, "StoreName").String(),
-				gjson.Get(data, "Data.id").String(),
+				gjson.Get(data, "Data.hash").String(),
 			)
 			return err
 		}

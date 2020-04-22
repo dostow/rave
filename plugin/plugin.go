@@ -70,12 +70,13 @@ var linkparams = `{
 						"bankCode": {"type": "string"},
 						"bankLocation": {"type": "string"},
 						"currency": {"type": "string"},
-						"meta": {"type": "object"},
+						"meta": {"type": "string"},
 						"narration": {"type": "string"},
 						"recipient": {"type": "string"},
 						"reference": {"type": "string"}
 					},
 					"required": [
+						"accountNumber",
 						"amount", 
 						"recipient", 
 						"reference", 
