@@ -44,26 +44,37 @@ var linkparams = `{
 			"oneOf": [
 				{ 
 					"type": "object", 
+					"description": "validate transfer",
 					"properties": {
-						"accountNumber": {"type": "string"},
-						"recipient": {"type": "string"},
+						"store": {"type": "string"},
+						"storeID": {"type": "string"},
 						"reference": {"type": "string"}
 					},
-					"required": ["reference"]
+					"required": ["reference"],
+                  	"additionalProperties": false
+				},
+				{ 
+					"type": "object",
+					"description": "delete transfer recipient", 
+					"properties": {
+						"recipient": {"type": "string"}
+					},
+					"required": ["recipient"],
+                  	"additionalProperties": false
 				},
 				{ 
 					"type": "object", 
+					"description": "createTransferRecipient create transfer recipient",
 					"properties": {
 						"accountNumber": {"type": "string"},
-						"recipient": {"type": "string"},
-						"bankCode": {
-							"type": "string"
-						}
+						"bankCode": {"type": "string"}
 					},
-					"required": ["accountNumber", "bankCode"]
+					"required": ["accountNumber", "bankCode"],
+                  	"additionalProperties": false
 				},
 				{ 
 					"type": "object", 
+					"description": "create transfer",
 					"properties": {
 						"accountNumber": {"type": "string"},
 						"amount": {"type": "string"},
@@ -83,7 +94,8 @@ var linkparams = `{
 						"currency", 
 						"narration", 
 						"bankLocation"
-					]
+					],
+                  	"additionalProperties": false
 				}
 			]
 		}
