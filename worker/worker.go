@@ -98,6 +98,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			storeNameString = options.Store
 		}
 		storeID := gjson.Get(data, options.StoreID)
+		c := api.NewClient(apiURL, config.APIKey)
 		if !dry {
 			log.Debugf(`rave.ValidateTransfer(ctx, "%s", "%s")`, config.Keys.Secret, reference.String())
 			resp, err := rave.GetTransfer(ctx,
@@ -105,8 +106,10 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 				reference.String(),
 			)
 			if err != nil {
+				log.WithError(err).Error(`rave.ValidateTransfer failed`)
 				return err
 			}
+			log.WithField("resp", resp).Debug(`rave.ValidateTransfer - transfer retrieved`)
 			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
 				if len(resp.Data.Transfers) > 0 {
 					transfer := resp.Data.Transfers[0]
@@ -114,26 +117,40 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 					updatedData := map[string]interface{}{
 						"rave": transfer,
 					}
-					if strings.Contains(strings.ToLower(transfer.Status), "success") {
+					transferStatus := strings.ToLower(transfer.Status)
+					if strings.Contains(transferStatus, "success") {
 						updatedData["status"] = "done"
 						updatedData["transactionStatus"] = 3
+					} else if strings.Contains(transferStatus, "failed") {
+						updatedData["status"] = "failed"
+						updatedData["transactionStatus"] = 4
 					}
-					c := api.NewClient(apiURL, config.APIKey)
-					log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+					log.Debugf(`rave.UpdateStore("%s", "%s")`, storeNameString, storeID.String())
 					_, err = c.Store.Update(
 						storeNameString,
 						storeID.String(),
 						updatedData,
 					)
-					_, err = c.Store.Update(
-						gjson.Get(data, "StoreName").String(),
-						gjson.Get(data, "Data.id").String(),
-						map[string]interface{}{
-							"status": "done",
-						},
-					)
+					if err == nil {
+						log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+						_, err = c.Store.Update(
+							gjson.Get(data, "StoreName").String(),
+							gjson.Get(data, "Data.id").String(),
+							map[string]interface{}{
+								"status": "done",
+							},
+						)
+					}
 					return err
 				}
+			} else {
+				_, err = c.Store.Update(
+					gjson.Get(data, "StoreName").String(),
+					gjson.Get(data, "Data.id").String(),
+					map[string]interface{}{
+						"status": "failed",
+					},
+				)
 			}
 			return errors.New("failed validating transfer - " + resp.Message)
 		}
