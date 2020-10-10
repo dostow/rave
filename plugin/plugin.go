@@ -42,6 +42,85 @@ var linkparams = `{
 		"options": {
 			"type": "object",
 			"oneOf": [
+				{
+					"type": "object",
+					"name": "Create Transaction Link
+					"description": "create transaction link for making payments",
+					"properties": {
+						"tx_ref": {
+							"type": "string"
+						},
+						"amount": {
+							"type": "string"
+						},
+						"currency": {
+							"type": "string"
+						},
+						"redirect_url": {
+							"type": "string"
+						},
+						"payment_options": {
+							"type": "string"
+						},
+						"meta": {
+							"type": "object",
+							"properties": {
+								"consumer_id": {
+									"type": "integer"
+								},
+								"consumer_mac": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"consumer_id"
+							]
+						},
+						"customer": {
+							"type": "object",
+							"properties": {
+								"email": {
+									"type": "string"
+								},
+								"phonenumber": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"email"
+							]
+						},
+						"customizations": {
+							"type": "object",
+							"properties": {
+								"title": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"logo": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title"
+							]
+						}
+					},
+					"required": [
+						"tx_ref",
+						"amount",
+						"currency",
+						"redirect_url",
+						"payment_options", 
+						"customer"
+					],
+                  	"additionalProperties": false
+				},
 				{ 
 					"type": "object", 
 					"description": "validate transfer",

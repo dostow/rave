@@ -2,9 +2,44 @@ package worker
 
 import (
 	"fmt"
+	"reflect"
+
 	// "reflect"
 	"strconv"
+
+	"github.com/tidwall/gjson"
 )
+
+// parseMapFields replaces map with parsed content
+func parseMapFields(data string, o map[string]interface{}) {
+	for k, v := range o {
+		switch v.(type) {
+		case string:
+			r := gjson.Get(data, v.(string))
+			// if r.Type()
+			if r.IsObject() {
+				o[k] = r.Value().(map[string]interface{})
+			} else {
+				o[k] = r.String()
+			}
+		case map[string]interface{}:
+			parseMapFields(data, v.(map[string]interface{}))
+		}
+	}
+}
+func parseStructFields(data string, o interface{}) {
+	v := reflect.ValueOf(o)
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		val := v.Field(i).Interface()
+		switch f.Kind() {
+		case reflect.String:
+		case reflect.Struct:
+			parseStructFields(data, val)
+		}
+	}
+
+}
 
 // func StringFromPushData(path string, data *PushData) (interface{}, error) {
 // 	keys := strings.Split(path, ".")

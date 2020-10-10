@@ -47,6 +47,13 @@ type Params struct {
 	} `json:"options"`
 }
 
+// CreateTransactionParams create transaction params
+type CreateTransactionParams struct {
+	Action   string           `json:"action"`
+	Callback string           `json:"callback"`
+	Options  *json.RawMessage `json:"options"`
+}
+
 // Data data from linked store
 type Data struct {
 	Data       map[string]interface{}
@@ -76,6 +83,56 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 	logger.Debugf("Received %s action", params.Action)
 	options := params.Options
 	switch params.Action {
+	case "createTransactionLink":
+		params := CreateTransactionParams{}
+		err = json.Unmarshal([]byte(addonParams), &params)
+		if err != nil {
+			return err
+		}
+		options := map[string]interface{}{}
+		err = json.Unmarshal([]byte(addonParams), &options)
+		if err != nil {
+			return err
+		}
+		opts := options["options"].(map[string]interface{})
+		parseMapFields(data, opts)
+		c := api.NewClient(apiURL, config.APIKey)
+		// ipReq := rave.PaymentRequest{}
+		// err = mapstructure.Decode(opts, &ipReq)
+		// if err != nil {
+		// 	return err
+		// }
+		resp, err := rave.InitializePayment(ctx,
+			config.Keys.Secret,
+			opts,
+		)
+		if err != nil {
+			logger.WithError(err).WithField("options", options).Error("Failed initializing payment")
+			log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+			_, err = c.Store.Update(
+				gjson.Get(data, "StoreName").String(),
+				gjson.Get(data, "Data.id").String(),
+				map[string]interface{}{
+					"status": "failed",
+				},
+			)
+			return err
+		}
+		result := map[string]interface{}{
+			"status": "done",
+		}
+		err = json.Unmarshal(*resp, &result)
+		if err != nil {
+			return err
+		}
+		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+		_, err = c.Store.Update(
+			gjson.Get(data, "StoreName").String(),
+			gjson.Get(data, "Data.id").String(),
+			result,
+		)
+		return err
+
 	case "validateTransfer":
 		// Get Transfer and then update transfer status
 		// If the transfer was successful, update the transfer status
