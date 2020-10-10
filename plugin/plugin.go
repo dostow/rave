@@ -44,7 +44,7 @@ var linkparams = `{
 			"oneOf": [
 				{
 					"type": "object",
-					"name": "Create Transaction Link
+					"name": "Create Transaction Link",
 					"description": "create transaction link for making payments",
 					"properties": {
 						"tx_ref": {
