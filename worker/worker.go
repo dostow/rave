@@ -118,13 +118,12 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			)
 			return err
 		}
-		result := map[string]interface{}{
-			"status": "done",
-		}
+		result := map[string]interface{}{}
 		err = json.Unmarshal(*resp, &result)
 		if err != nil {
 			return err
 		}
+		result["status"] = "done"
 		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 		_, err = c.Store.Update(
 			gjson.Get(data, "StoreName").String(),

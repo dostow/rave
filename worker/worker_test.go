@@ -107,8 +107,13 @@ func Test_createTransactionLink(t *testing.T) {
 							"currency": "data.currency",
 							"redirect_url": "data.redirectURL",
 							"payment_options": "data.paymentOptions",
-							"customer": "data.customer",
-							"customizations": "data.customizations"
+							"customer": {
+								"email": "data.customer.email",
+								"name": "data.customer.name"
+							},
+							"customizations": {
+								"title": "data.customizations.title"
+							}
 						}
 					}`,
 				data:    string(data),

@@ -37,7 +37,7 @@ var linkparams = `{
 		},
 		"action": {
 			"type": "string",
-			"enum": ["createTransferRecipient", "createTransfer", "deleteTransferRecipient", "validateTransfer"]
+			"enum": ["createTransactionLink", "createTransferRecipient", "createTransfer", "deleteTransferRecipient", "validateTransfer"]
 		},
 		"options": {
 			"type": "object",
@@ -63,18 +63,7 @@ var linkparams = `{
 							"type": "string"
 						},
 						"meta": {
-							"type": "object",
-							"properties": {
-								"consumer_id": {
-									"type": "integer"
-								},
-								"consumer_mac": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"consumer_id"
-							]
+							"type": "string"
 						},
 						"customer": {
 							"type": "object",
