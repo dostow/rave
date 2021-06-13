@@ -33,17 +33,19 @@ type Params struct {
 	Action   string `json:"action"`
 	Callback string `json:"callback"`
 	Options  struct {
-		AccountNumber string `json:"accountNumber"`
-		Amount        string `json:"amount"`
-		BankCode      string `json:"bankCode"`
-		BankLocation  string `json:"bankLocation"`
-		Currency      string `json:"currency"`
-		Meta          string `json:"meta"`
-		Narration     string `json:"narration"`
-		Recipient     string `json:"recipient"`
-		Reference     string `json:"reference"`
-		Store         string `json:"store"`
-		StoreID       string `json:"storeID"`
+		AccountNumber  string `json:"accountNumber"`
+		Amount         string `json:"amount"`
+		BankCode       string `json:"bankCode"`
+		BankLocation   string `json:"bankLocation"`
+		Currency       string `json:"currency"`
+		Meta           string `json:"meta"`
+		Narration      string `json:"narration"`
+		Recipient      string `json:"recipient"`
+		RecipientName  string `json:"recipientName"`
+		RecipientPhone string `json:"recipientPhone"`
+		Reference      string `json:"reference"`
+		Store          string `json:"store"`
+		StoreID        string `json:"storeID"`
 	} `json:"options"`
 }
 
@@ -162,13 +164,37 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 				reference.String(),
 			)
 			if err != nil {
-				log.WithError(err).Error(`rave.ValidateTransfer failed`)
+				log.Debugf(`rave.ValidateTransfer(ctx, "%s", "%s")`, config.Keys.Secret, reference.String(), "faield with error", err.Error())
+				if len(reference.String()) == 0 || strings.Contains(err.Error(), "not found") {
+					// update validation and transfer to reflect not found
+					// set status to retry, this should trigger an update addon link if exists
+					log.Debugf(`rave.UpdateStore("%s", "%s") set to retry`, storeNameString, storeID.String())
+					_, err = c.Store.Update(
+						storeNameString,
+						storeID.String(),
+						map[string]interface{}{
+							"status": "retry",
+						},
+					)
+					if err == nil {
+						log.Debugf(`rave.UpdateStore("%s", "%s") set to failed`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+						_, err = c.Store.Update(
+							gjson.Get(data, "StoreName").String(),
+							gjson.Get(data, "Data.id").String(),
+							map[string]interface{}{
+								"status": "failed",
+							},
+						)
+					}
+					return err
+				}
+				log.WithError(err).WithField("resp", resp).Error(`rave.ValidateTransfer failed`)
 				return err
 			}
 			log.WithField("resp", resp).Debug(`rave.ValidateTransfer - transfer retrieved`)
 			if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
-				if len(resp.Data.Transfers) > 0 {
-					transfer := resp.Data.Transfers[0]
+				if resp.Data != nil {
+					transfer := resp.Data
 					log.WithField("transfer", transfer.ID).WithField("status", transfer.Status).Debugf("got transfer")
 					updatedData := map[string]interface{}{
 						"rave": transfer,
@@ -199,7 +225,16 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 					}
 					return err
 				}
-			} else {
+			}
+
+			_, err = c.Store.Update(
+				storeNameString,
+				storeID.String(),
+				map[string]interface{}{
+					"status": "failed",
+				},
+			)
+			if err == nil {
 				_, err = c.Store.Update(
 					gjson.Get(data, "StoreName").String(),
 					gjson.Get(data, "Data.id").String(),
@@ -208,7 +243,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 					},
 				)
 			}
-			return errors.New("failed validating transfer - " + resp.Message)
+			return err
 		}
 		// update store with
 		return err
@@ -288,15 +323,28 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		bankCode := gjson.Get(data, options.BankCode)
 		accountNumber := gjson.Get(data, options.AccountNumber)
 		meta := gjson.Get(data, options.Meta)
+		recipientName := gjson.Get(data, options.RecipientName)
+		status := gjson.Get(data, "Data.status").String()
+		if !(status == "pending" || status == "retry") {
+			msg := "unable to create transfer - status is not pending or being retried"
+			logger.Error(msg)
+			return errors.New(msg)
 
+		}
+		fullname := recipientName.String()
+		if len(fullname) == 0 {
+			fullname = reference.String()
+		}
 		metaMap := map[string]interface{}{}
 		if meta.Exists() {
 			for k, v := range meta.Map() {
 				metaMap[k] = v.Value()
 			}
 		}
+		c := api.NewClient(apiURL, config.APIKey)
 		resp, err := rave.CreateTransfer(ctx,
 			config.Keys.Secret,
+			fullname,
 			reference.String(),
 			fmt.Sprintf("%v", amount.Int()),
 			recipient.String(),
@@ -310,14 +358,32 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		)
 		if err != nil {
 			logger.Errorf("unable to create transfer - %s", err.Error())
+			var existing *rave.GetTransferResult
+			if strings.Contains(err.Error(), "Payout with this ref already exists") {
+				// get existing
+				existing, err = rave.GetTransfer(ctx, config.Keys.Secret, reference.String())
+				status := "failed"
+				upd := map[string]interface{}{
+					"status": status,
+				}
+				if err == nil {
+					upd["rave"] = existing.Data
+				}
+				_, err = c.Store.Update(
+					gjson.Get(data, "StoreName").String(),
+					gjson.Get(data, "Data.id").String(),
+					upd,
+				)
+			}
 			return err
 		}
 		if strings.Contains(resp.Status, "success") || strings.Contains(resp.Status, "ok") {
-			c := api.NewClient(apiURL, config.APIKey)
-			status := "pending"
+			logger.WithField("resp", resp).Debug("Transfer created")
 			raveStatus := strings.ToLower(resp.Data.Status)
 			if raveStatus == "successful" {
 				status = "completed"
+			} else {
+				status = "processing"
 			}
 			if raveStatus == "failed" {
 				status = "error"

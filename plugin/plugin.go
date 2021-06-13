@@ -152,6 +152,8 @@ var linkparams = `{
 						"meta": {"type": "string"},
 						"narration": {"type": "string"},
 						"recipient": {"type": "string"},
+						"recipientName": {"type": "string"},
+						"recipientPhone": {"type": "string"},
 						"reference": {"type": "string"}
 					},
 					"required": [
