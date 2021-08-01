@@ -11,10 +11,8 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-var url = "https://api.ravepay.co/v2/gpx"
-
 type errorResponse struct {
-	Status  string `json:"status"`
+	Status  bool   `json:"status"`
 	Message string `json:"message"`
 }
 

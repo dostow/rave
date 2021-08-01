@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/apex/log"
+	"github.com/dostow/rave/api/models"
+	"github.com/dostow/rave/api/paystack"
 	"github.com/dostow/rave/api/rave"
 	"github.com/dostow/rave/queues/machinery"
 	"github.com/osiloke/dostow-contrib/api"
@@ -24,8 +26,9 @@ type Keys struct {
 
 // Config addon config
 type Config struct {
-	APIKey string `json:"apiKey"`
-	Keys   Keys   `json:"keys"`
+	Platform string `json:"platform"`
+	APIKey   string `json:"apiKey"`
+	Keys     Keys   `json:"keys"`
 }
 
 // Params linked store params
@@ -51,9 +54,9 @@ type Params struct {
 
 // CreateTransactionParams create transaction params
 type CreateTransactionParams struct {
-	Action   string           `json:"action"`
-	Callback string           `json:"callback"`
-	Options  *json.RawMessage `json:"options"`
+	Action   string                `json:"action"`
+	Callback string                `json:"callback"`
+	Options  models.PaymentRequest `json:"options"`
 }
 
 // Data data from linked store
@@ -84,6 +87,13 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 	}
 	logger.Debugf("Received %s action", params.Action)
 	options := params.Options
+	var paymentAPI models.API
+	switch config.Platform {
+	case "paystack":
+		paymentAPI = &paystack.Paystack{}
+	default:
+		paymentAPI = &rave.Rave{}
+	}
 	switch params.Action {
 	case "createTransactionLink":
 		params := CreateTransactionParams{}
@@ -91,22 +101,11 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		if err != nil {
 			return err
 		}
-		options := map[string]interface{}{}
-		err = json.Unmarshal([]byte(addonParams), &options)
-		if err != nil {
-			return err
-		}
-		opts := options["options"].(map[string]interface{})
-		parseMapFields(data, opts)
+		parseStructFields(data, &params.Options)
 		c := api.NewClient(apiURL, config.APIKey)
-		// ipReq := rave.PaymentRequest{}
-		// err = mapstructure.Decode(opts, &ipReq)
-		// if err != nil {
-		// 	return err
-		// }
-		resp, err := rave.InitializePayment(ctx,
+		resp, err := paymentAPI.InitializePayment(ctx,
 			config.Keys.Secret,
-			opts,
+			&params.Options,
 		)
 		if err != nil {
 			logger.WithError(err).WithField("options", options).Error("Failed initializing payment")
@@ -120,12 +119,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			)
 			return err
 		}
-		result := map[string]interface{}{}
-		err = json.Unmarshal(*resp, &result)
-		if err != nil {
-			return err
-		}
-		result["status"] = "done"
+		result := map[string]interface{}{"status": "done", "link": resp.Link}
 		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 		_, err = c.Store.Update(
 			gjson.Get(data, "StoreName").String(),
@@ -164,7 +158,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 				reference.String(),
 			)
 			if err != nil {
-				log.Debugf(`rave.ValidateTransfer(ctx, "%s", "%s")`, config.Keys.Secret, reference.String(), "faield with error", err.Error())
+				log.Errorf(`rave.ValidateTransfer(ctx, "%s", "%s") = %s`, config.Keys.Secret, reference.String(), err.Error())
 				if len(reference.String()) == 0 || strings.Contains(err.Error(), "not found") {
 					// update validation and transfer to reflect not found
 					// set status to retry, this should trigger an update addon link if exists
@@ -177,7 +171,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 						},
 					)
 					if err == nil {
-						log.Debugf(`rave.UpdateStore("%s", "%s") set to failed`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+						log.Debugf(`rave.UpdateStore("%s", "%s") = %s`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 						_, err = c.Store.Update(
 							gjson.Get(data, "StoreName").String(),
 							gjson.Get(data, "Data.id").String(),

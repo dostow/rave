@@ -16,6 +16,8 @@ require (
 	github.com/go-resty/resty/v2 v2.0.0
 	github.com/google/uuid v1.1.1
 	github.com/jaffee/commandeer v0.1.0
+	github.com/micro/go-micro v1.18.0 // indirect
+	github.com/micro/go-web v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/osiloke/dostow-contrib v0.0.0-20190706085039-50a5c9d36d0e

@@ -9,6 +9,7 @@ import (
 )
 
 var secret = "FLWSECK_TEST-a923c443c50b874aa8c5c1e039560c02-X"
+var psecret = "sk_test_fecc4dcfad0b996c745e0b0c02a0077e533dc2a3"
 
 func Test_doRave(t *testing.T) {
 	type args struct {
@@ -98,7 +99,33 @@ func Test_createTransactionLink(t *testing.T) {
 		{
 			"",
 			args{
-				addonConfig: fmt.Sprintf(`{"keys": {"secret":"%s"}}`, secret),
+				addonConfig: fmt.Sprintf(`{"keys": {"secret":"%s"}, "platform": "rave"}`, secret),
+				addonParams: `{
+						"action": "createTransactionLink",
+						"options": {
+							"tx_ref": "data.ref",
+							"amount": "data.amount",
+							"currency": "data.currency",
+							"redirect_url": "data.redirectURL",
+							"payment_options": "data.paymentOptions",
+							"customer": {
+								"email": "data.customer.email",
+								"name": "data.customer.name"
+							},
+							"customizations": {
+								"title": "data.customizations.title"
+							}
+						}
+					}`,
+				data:    string(data),
+				traceID: "",
+			},
+			false,
+		},
+		{
+			"",
+			args{
+				addonConfig: fmt.Sprintf(`{"keys": {"secret":"%s"}, "platform": "paystack"}`, psecret),
 				addonParams: `{
 						"action": "createTransactionLink", 
 						"options": {

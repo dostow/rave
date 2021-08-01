@@ -27,18 +27,32 @@ func parseMapFields(data string, o map[string]interface{}) {
 		}
 	}
 }
+
 func parseStructFields(data string, o interface{}) {
-	v := reflect.ValueOf(o)
-	for i := 0; i < v.NumField(); i++ {
-		f := v.Field(i)
-		val := v.Field(i).Interface()
+	obj := reflect.ValueOf(o)
+	fieldCount := 0
+	obj = obj.Elem()
+	fieldCount = obj.NumField()
+	for i := 0; i < fieldCount; i++ {
+		f := obj.Field(i)
+		val := f.Interface()
 		switch f.Kind() {
 		case reflect.String:
-		case reflect.Struct:
-			parseStructFields(data, val)
+			r := gjson.Get(data, val.(string))
+			if r.IsObject() {
+				m := r.Value().(map[string]interface{})
+				for k, v := range m {
+					f.SetMapIndex(reflect.ValueOf(k), reflect.ValueOf(v))
+				}
+			} else {
+				f.Set(reflect.ValueOf(r.String()))
+			}
+		case reflect.Ptr:
+			if !f.IsNil() {
+				parseStructFields(data, val)
+			}
 		}
 	}
-
 }
 
 // func StringFromPushData(path string, data *PushData) (interface{}, error) {
