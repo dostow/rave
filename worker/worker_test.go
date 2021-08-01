@@ -79,6 +79,7 @@ func Test_createTransactionLink(t *testing.T) {
 		"currency":       "NGN",
 		"redirectURL":    "/",
 		"paymentOptions": "card",
+		"plan":           "PLN_fie5mzirwk67sc1",
 		"customer": map[string]interface{}{
 			"email": "hovaitis@gmail.com",
 			"name":  "Osiloke Emoekpere",
@@ -130,7 +131,7 @@ func Test_createTransactionLink(t *testing.T) {
 						"action": "createTransactionLink", 
 						"options": {
 							"tx_ref": "data.ref",
-							"amount": "data.amount", 
+							"plan": "data.plan",
 							"currency": "data.currency",
 							"redirect_url": "data.redirectURL",
 							"payment_options": "data.paymentOptions",

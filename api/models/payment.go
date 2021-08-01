@@ -24,9 +24,11 @@ type Customizations struct {
 type PaymentRequest struct {
 	TxRef          string          `json:"tx_ref"`
 	Amount         string          `json:"amount"`
+	Plan           string          `json:"plan"`
 	Currency       string          `json:"currency"`
 	RedirectURL    string          `json:"redirect_url"`
 	Narration      string          `json:"narration"`
+	Subaccount     string          `json:"subaccount"`
 	PaymentOptions string          `json:"payment_options"`
 	Meta           *Meta           `json:"meta"`
 	Customer       *Customer       `json:"customer"`

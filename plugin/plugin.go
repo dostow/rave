@@ -70,6 +70,12 @@ var linkparams = `{
 						"meta": {
 							"type": "string"
 						},
+						"plan": {
+							"type": "string"
+						},
+						"subaccount": {
+							"type": "string"
+						},
 						"customer": {
 							"type": "object",
 							"properties": {

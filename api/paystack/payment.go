@@ -35,7 +35,7 @@ type PaymentLinkData struct {
 type InitializePaymentResultData struct {
 	AuthorizationURL string `json:"authorization_url"`
 	AccessCode       string `json:"acecess_code"`
-	Reference        string `json:"referennce"`
+	Reference        string `json:"reference"`
 }
 
 // InitializePaymentResult delete result
@@ -57,6 +57,8 @@ func (p *Paystack) InitializePayment(ctx context.Context, seckey string, req *mo
 		Channels:    strings.Split(req.PaymentOptions, ","),
 		Email:       req.Customer.Email,
 		Metadata:    string(metadata),
+		Plan:        req.Plan,
+		Subaccount:  req.Subaccount,
 	}
 	resp, err := client.R().
 		EnableTrace().
