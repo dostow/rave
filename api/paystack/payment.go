@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/dostow/rave/api/models"
@@ -13,7 +14,7 @@ import (
 
 // PaymentRequest payment request
 type PaymentRequest struct {
-	TxRef             string   `json:"referennce"`
+	TxRef             string   `json:"reference"`
 	Amount            string   `json:"amount"`
 	Currency          string   `json:"currency"`
 	CallbackURL       string   `json:"callbask_url"`
@@ -49,9 +50,10 @@ type InitializePaymentResult struct {
 func (p *Paystack) InitializePayment(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
 	client := resty.New()
 	metadata, _ := json.Marshal(&req.Meta)
+	amount, _ := strconv.Atoi(req.Amount)
 	preq := PaymentRequest{
 		TxRef:       req.TxRef,
-		Amount:      req.Amount,
+		Amount:      fmt.Sprintf("%v", amount*100),
 		Currency:    req.Currency,
 		CallbackURL: req.RedirectURL,
 		Channels:    strings.Split(req.PaymentOptions, ","),
