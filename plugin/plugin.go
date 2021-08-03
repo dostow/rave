@@ -25,9 +25,24 @@ var addonconfig = `{
 			},
 			"required": ["secret", "public"],
 			"additionalProperties": false
+		},
+		"paystack": {
+			"type": "object",
+			"properties": {
+				"secret": {
+					"type": "string",
+					"description": "Secret key"
+				},
+				"public": {
+					"type": "string",
+					"description": "Public key"
+				}
+			},
+			"required": ["secret", "public"],
+			"additionalProperties": false
 		}
 	},
-	"required": ["keys"],
+	"required": ["platform"],
 	"type": "object",
 	"additionalProperties": false
 }`

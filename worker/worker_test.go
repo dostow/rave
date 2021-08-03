@@ -126,7 +126,7 @@ func Test_createTransactionLink(t *testing.T) {
 		{
 			"",
 			args{
-				addonConfig: fmt.Sprintf(`{"keys": {"secret":"%s"}, "platform": "paystack"}`, psecret),
+				addonConfig: fmt.Sprintf(`{"paystack": {"secret":"%s"}, "platform": "paystack"}`, psecret),
 				addonParams: `{
 						"action": "createTransactionLink", 
 						"options": {

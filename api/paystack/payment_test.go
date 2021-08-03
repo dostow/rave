@@ -14,8 +14,7 @@ func TestInitializePayment(t *testing.T) {
 
 	u, _ := uuid.NewUUID()
 	type args struct {
-		ctx    context.Context
-		seckey string
+		ctx    context.Context 
 		req    *models.PaymentRequest
 	}
 	tests := []struct {
@@ -24,18 +23,18 @@ func TestInitializePayment(t *testing.T) {
 		want    interface{}
 		wantErr bool
 	}{
-		{"", args{context.Background(), "FLWSECK_TEST-a923c443c50b874aa8c5c1e039560c02-X", &models.PaymentRequest{
+		{"", args{context.Background(), , &models.PaymentRequest{
 			TxRef:       u.String(),
 			Amount:      "100",
 			Currency:    "NGN",
 			RedirectURL: "/",
-			Meta:        models.Meta{User: "osiloke"},
+			Meta:        &models.Meta{User: "osiloke"},
 		}}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := Paystack{}
-			got, err := r.InitializePayment(tt.args.ctx, tt.args.seckey, tt.args.req)
+			r := Paystack{Config: models.Keys{Secret: "FLWSECK_TEST-a923c443c50b874aa8c5c1e039560c02-X"}}
+			got, err := r.InitializePayment(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InitializePayment() error = %v, wantErr %v", err, tt.wantErr)
 				return

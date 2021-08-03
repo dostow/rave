@@ -41,5 +41,5 @@ type PaymentResponse struct {
 }
 
 type Payment interface {
-	InitializePayment(ctx context.Context, seckey string, req *PaymentRequest) (*PaymentResponse, error)
+	InitializePayment(ctx context.Context, req *PaymentRequest) (*PaymentResponse, error)
 }

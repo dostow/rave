@@ -46,7 +46,7 @@ type InitializePaymentResult struct {
 }
 
 // InitializePayment initialize a payment
-func (p *Paystack) InitializePayment(ctx context.Context, seckey string, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+func (p *Paystack) InitializePayment(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
 	client := resty.New()
 	metadata, _ := json.Marshal(&req.Meta)
 	preq := PaymentRequest{
@@ -62,7 +62,7 @@ func (p *Paystack) InitializePayment(ctx context.Context, seckey string, req *mo
 	}
 	resp, err := client.R().
 		EnableTrace().
-		SetHeader("Authorization", "Bearer "+seckey).
+		SetHeader("Authorization", "Bearer "+p.Config.Secret).
 		SetResult(&InitializePaymentResult{}).
 		SetError(&errorResponse{}).
 		SetBody(preq).

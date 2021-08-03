@@ -35,6 +35,11 @@ func parseStructFields(data string, o interface{}) {
 	fieldCount = obj.NumField()
 	for i := 0; i < fieldCount; i++ {
 		f := obj.Field(i)
+		c := obj.Type().Field(i).Tag
+		g := c.Get("ignore")
+		if g == "-" {
+			continue
+		}
 		val := f.Interface()
 		switch f.Kind() {
 		case reflect.String:

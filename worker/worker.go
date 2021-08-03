@@ -18,17 +18,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Keys flutterwave keys
-type Keys struct {
-	Secret string `json:"secret"`
-	Public string `json:"public"`
-}
-
 // Config addon config
 type Config struct {
-	Platform string `json:"platform"`
-	APIKey   string `json:"apiKey"`
-	Keys     Keys   `json:"keys"`
+	Platform string      `json:"platform"`
+	APIKey   string      `json:"apiKey"`
+	Keys     models.Keys `json:"keys"`
+	Paystack models.Keys `json:"paystack"`
 }
 
 // Params linked store params
@@ -90,9 +85,9 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 	var paymentAPI models.API
 	switch config.Platform {
 	case "paystack":
-		paymentAPI = &paystack.Paystack{}
+		paymentAPI = &paystack.Paystack{Config: config.Paystack}
 	default:
-		paymentAPI = &rave.Rave{}
+		paymentAPI = &rave.Rave{Config: config.Keys}
 	}
 	switch params.Action {
 	case "createTransactionLink":
@@ -104,7 +99,6 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		parseStructFields(data, &params.Options)
 		c := api.NewClient(apiURL, config.APIKey)
 		resp, err := paymentAPI.InitializePayment(ctx,
-			config.Keys.Secret,
 			&params.Options,
 		)
 		if err != nil {
@@ -119,6 +113,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 			)
 			return err
 		}
+		fmt.Println(resp.Link)
 		result := map[string]interface{}{"status": "done", "link": resp.Link}
 		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
 		_, err = c.Store.Update(
