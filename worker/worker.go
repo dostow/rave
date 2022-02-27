@@ -13,7 +13,7 @@ import (
 	"github.com/dostow/rave/api/models"
 	"github.com/dostow/rave/api/paystack"
 	"github.com/dostow/rave/api/rave"
-	"github.com/dostow/rave/queues/machinery"
+	"github.com/dostow/worker/pkg/queues/machinery"
 	"github.com/osiloke/dostow-contrib/api"
 	"github.com/tidwall/gjson"
 )

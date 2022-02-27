@@ -6,6 +6,8 @@ type API interface {
 
 // Keys flutterwave keys
 type Keys struct {
-	Secret string `json:"secret"`
-	Public string `json:"public"`
+	Secret    string `json:"secret"`
+	Public    string `json:"public"`
+	PassKey   string `json:"passkey"`
+	ShortCode string `json:"shortcode"`
 }

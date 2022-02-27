@@ -15,3 +15,4 @@ cmd/rave/.bra.toml
 rave
 test.go
 .vscode/settings.json
+.history

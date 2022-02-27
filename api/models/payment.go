@@ -19,6 +19,7 @@ type Customizations struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Logo        string `json:"logo"`
+	CallbackURL string `json:"callback_url"`
 }
 
 type PaymentRequest struct {
@@ -38,6 +39,7 @@ type PaymentRequest struct {
 type PaymentResponse struct {
 	Link     string `json:"link"`
 	Original *json.RawMessage
+	Message  string `json:"message"`
 }
 
 type Payment interface {

@@ -1,14 +1,13 @@
-# rave : A multi dispatcher service for communicating with rave
+# rave : A multipayment gateway service
 
 ## Overview [![GoDoc](https://godoc.org/github.com/dostow/rave?status.svg)](https://godoc.org/github.com/dostow/rave)
 
-A multi dispatcher service for communicating with flutterwave - rave api
+A multipayment gateway service
 
 ## Dispatchers
 
 - machinery
-  This dispatcher uses machinery as a task dispatcher.
-  
+  Picks tasks from machinery.
 - firestore/google cloud function
   This leverages on firestore data mutation events to launch a cloud function that handles a rave api task
 

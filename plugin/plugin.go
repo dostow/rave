@@ -40,6 +40,52 @@ var addonconfig = `{
 			},
 			"required": ["secret", "public"],
 			"additionalProperties": false
+		},
+		"mpesa": {
+			"type": "object",
+			"properties": {
+				"secret": {
+					"type": "string",
+					"description": "Secret key"
+				},
+				"public": {
+					"type": "string",
+					"description": "Public key"
+				},
+				"passkey": {
+					"type": "string",
+					"description": "Pass Key"
+				},
+				"shortcode": {
+					"type": "string",
+					"description": "Business Short Code"
+				}
+			},
+			"required": ["secret", "public"],
+			"additionalProperties": false
+		},
+		"quikk": {
+			"type": "object",
+			"properties": {
+				"secret": {
+					"type": "string",
+					"description": "Secret key"
+				},
+				"public": {
+					"type": "string",
+					"description": "Public key"
+				},
+				"passkey": {
+					"type": "string",
+					"description": "Pass Key"
+				},
+				"shortcode": {
+					"type": "string",
+					"description": "Business Short Code"
+				}
+			},
+			"required": ["secret", "public", "shortcode"],
+			"additionalProperties": false
 		}
 	},
 	"required": ["platform"],
@@ -118,6 +164,9 @@ var linkparams = `{
 									"type": "string"
 								},
 								"logo": {
+									"type": "string"
+								},
+								"callback_url": {
 									"type": "string"
 								}
 							},
