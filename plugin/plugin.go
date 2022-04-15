@@ -8,7 +8,24 @@ var addonconfig = `{
 		"platform": {
 			"type": "string",
 			"description": "Platform",
-			"enum": ["paystack", "rave"]
+			"enum": ["paystack", "rave", "quikk", "mpesa"]
+		},
+		"callback": {
+			"properties": { 
+				"url": {
+					"type": "string",
+					"description": "callback url for response"
+				},
+				"method": {
+					"type": "string",
+					"enum": ["POST", "PUT"]
+				},
+				"headers": {
+					"type": "object",
+					"description": "headers for request"
+				}
+			},
+			"type": "object"
 		},
 		"apiKey": {"type": "string"},
 		"keys": {

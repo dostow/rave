@@ -1,12 +1,16 @@
 package worker
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	// "reflect"
 	"strconv"
 
+	"github.com/apex/log"
+	"github.com/sethgrid/pester"
 	"github.com/tidwall/gjson"
 )
 
@@ -50,7 +54,9 @@ func parseStructFields(data string, o interface{}) {
 					f.SetMapIndex(reflect.ValueOf(k), reflect.ValueOf(v))
 				}
 			} else {
-				f.Set(reflect.ValueOf(r.String()))
+				if len(r.String()) > 0 {
+					f.Set(reflect.ValueOf(r.String()))
+				}
 			}
 		case reflect.Ptr:
 			if !f.IsNil() {
@@ -100,4 +106,22 @@ func Get(key string, s interface{}) (v interface{}, err error) {
 	}
 	//fmt.Println("Value:", v, " Key:", key, "Error:", err)
 	return v, err
+}
+
+func postRequest(client *pester.Client, config Config, data interface{}) error {
+	d, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	contentType := "application/json"
+	if v, ok := config.Callback.Headers["content-type"].(string); ok {
+		contentType = v
+	}
+	_, err = client.Post(config.Callback.URL, contentType, strings.NewReader(string(d)))
+	if err != nil {
+		log.WithField("callback", config.Callback).WithError(err).Error(client.LogString())
+	} else {
+		log.WithField("callback", config.Callback).Debug(client.LogString())
+	}
+	return err
 }

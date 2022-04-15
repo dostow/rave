@@ -14,8 +14,8 @@ func TestInitializePayment(t *testing.T) {
 
 	u, _ := uuid.NewUUID()
 	type args struct {
-		ctx    context.Context 
-		req    *models.PaymentRequest
+		ctx context.Context
+		req *models.PaymentRequest
 	}
 	tests := []struct {
 		name    string
@@ -23,13 +23,21 @@ func TestInitializePayment(t *testing.T) {
 		want    interface{}
 		wantErr bool
 	}{
-		{"", args{context.Background(), , &models.PaymentRequest{
-			TxRef:       u.String(),
-			Amount:      "100",
-			Currency:    "NGN",
-			RedirectURL: "/",
-			Meta:        &models.Meta{User: "osiloke"},
-		}}, nil, false},
+		{
+			"",
+			args{
+				context.Background(),
+				&models.PaymentRequest{
+					TxRef:       u.String(),
+					Amount:      "100",
+					Currency:    "NGN",
+					RedirectURL: "/",
+					Meta:        &models.Meta{User: "osiloke"},
+				},
+			},
+			nil,
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -40,7 +48,7 @@ func TestInitializePayment(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				fmt.Println(string(*got))
+				fmt.Println(*got)
 				t.Errorf("InitializePayment() = %v, want %v", got, tt.want)
 			}
 		})

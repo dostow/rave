@@ -17,20 +17,19 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-var nairobi *time.Location
-
-func init() {
-	nairobi, _ = time.LoadLocation("Africa/Nairobi")
-}
-
 type Attributes struct {
-	Amount       int       `json:"amount,omitempty"`
-	CustomerType string    `json:"customer_type,omitempty"`
-	CustomerNo   string    `json:"customer_no,omitempty"`
-	ShortCode    string    `json:"short_code,omitempty"`
-	PostedAt     time.Time `json:"posted_at,omitempty"`
-	Reference    string    `json:"reference,omitempty"`
-	ResourceID   string    `json:"resource_id,omitempty"`
+	Amount            int       `json:"amount,omitempty"`
+	CustomerType      string    `json:"customer_type,omitempty"`
+	CustomerNo        string    `json:"customer_no,omitempty"`
+	ShortCode         string    `json:"short_code,omitempty"`
+	PostedAt          time.Time `json:"posted_at,omitempty"`
+	Reference         string    `json:"reference,omitempty"`
+	ResourceID        string    `json:"resource_id,omitempty"`
+	RecipientNo       string    `json:"recipient_no,omitempty"`
+	RecipientType     string    `json:"recipient_type,omitempty"`
+	RecipientIDType   string    `json:"recipient_id_type,omitempty"`
+	RecipientIDNumber string    `json:"recipient_id_number,omitempty"`
+	OriginTxnId       string    `json:"origin_txn_id,omitempty"`
 }
 
 type Data struct {
@@ -68,20 +67,52 @@ type APIErrors struct {
 }
 
 func encrypt(key, secret, noww string) string {
-	to_encode := fmt.Sprintf("x-aux-date: %s", noww)
+	to_encode := fmt.Sprintf("date: %s", noww)
 	hash := hmac.New(sha256.New, []byte(secret))
 	hash.Write([]byte(to_encode))
 	buf := hash.Sum(nil)
 	encoded := base64.StdEncoding.Strict().EncodeToString(buf)
 	url_encoded := url.QueryEscape(encoded)
-	return fmt.Sprintf(`keyId="%s",algorithm="hmac-sha256",headers="x-aux-date",signature="%s"`, key, url_encoded)
+	return fmt.Sprintf(`keyId="%s",algorithm="hmac-sha256",signature="%s"`, key, url_encoded)
 }
 
-// InitializePayment initialize a payment
+func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*models.PaymentResponse, error) {
+	ts := ct.UTC().Format("Mon, 02 Jan 2006 15:04:05 MST")
+	authorization := encrypt(r.Public, r.Secret, ts)
+	client := resty.New()
+	resp, err := client.R().
+		EnableTrace().
+		SetHeader("content-type", "application/json").
+		SetHeader("Authorization", authorization).
+		SetHeader("Date", ts).
+		SetResult(&PaymentResult{}).
+		SetError(&errorResponse{}).
+		SetBody(reqBody).
+		Post(fmt.Sprintf("%s/%s", productionAPIURL, path))
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() == 200 {
+		result := resp.Result().(*PaymentResult)
+		in, _ := json.Marshal(result.Data)
+		raw := json.RawMessage(in)
+		if result.Meta.Status != "FAIL" {
+			return &models.PaymentResponse{Link: "", Original: &raw}, nil
+		}
+		return nil, errors.New(result.Meta.Detail)
+	}
+	var apiErrors APIErrors
+	if err := json.Unmarshal(resp.Body(), &apiErrors); err == nil {
+		return nil, errors.New(apiErrors.Errors[0].Detail)
+	}
+	respBody := resp.Error().(*errorResponse)
+	return nil, errors.New(respBody.Message)
+}
+
+// Charge initialize a payment and send an stk push
 func (r *Quikk) Charge(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
-	ct := time.Now().UTC().In(nairobi)
-	ts := ct.Format("Mon, 02 Jan 2006 15:04:05 MST")
-	authorization := encrypt(r.Config.Public, r.Config.Secret, ts)
+	ct := time.Now()
+
 	amount, _ := conv.Int(req.Amount)
 	reqBody := &PaymentRequest{
 		Data: Data{
@@ -96,38 +127,40 @@ func (r *Quikk) Charge(ctx context.Context, req *models.PaymentRequest) (*models
 			},
 		},
 	}
-	rr, _ := json.Marshal(&reqBody)
-	fmt.Println("x-aux-date: ", ts)
-	fmt.Println("authorization: ", authorization)
-	fmt.Println("\nBody\n", string(rr))
-	client := resty.New()
-	resp, err := client.R().
-		EnableTrace().
-		SetHeader("content-type", "application/json").
-		SetHeader("authorization", authorization).
-		SetResult(&PaymentResult{}).
-		SetError(&errorResponse{}).
-		SetBody(reqBody).
-		Post(fmt.Sprintf("%s/mpesa/charge", stagingAPIURL))
-	if err != nil {
-		return nil, err
+	return r.doRequest("charge", ct, reqBody)
+}
+
+// Refund initialize a payment
+func (r *Quikk) Refund(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	ct := time.Now()
+	reqBody := &PaymentRequest{
+		Data: Data{
+			Type: "refund",
+			Attributes: Attributes{
+				ShortCode:   r.ShortCode,
+				OriginTxnId: req.TxRef,
+			},
+		},
 	}
-	if resp.StatusCode() == 200 {
-		result := resp.Result().(*PaymentResult)
-		in, _ := json.Marshal(result.Data)
-		raw := json.RawMessage(in)
-		if result.Meta.Status != "FAIL" {
-			return &models.PaymentResponse{Link: "", Original: &raw}, nil
-		}
-		fmt.Println(result)
-		fmt.Println(string(resp.Body()))
-		return nil, errors.New(result.Meta.Detail)
+	return r.doRequest("refund", ct, reqBody)
+}
+
+// Refund initialize a payment
+func (r *Quikk) Payout(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	ct := time.Now()
+	reqBody := &PaymentRequest{
+		Data: Data{
+			Type: "payouts",
+			Attributes: Attributes{
+				ShortCode:   r.ShortCode,
+				OriginTxnId: req.TxRef,
+			},
+		},
 	}
-	fmt.Println(string(resp.Body()))
-	var apiErrors APIErrors
-	if err := json.Unmarshal(resp.Body(), &apiErrors); err == nil {
-		return nil, errors.New(apiErrors.Errors[0].Detail)
-	}
-	respBody := resp.Error().(*errorResponse)
-	return nil, errors.New(respBody.Message)
+	return r.doRequest("payouts", ct, reqBody)
+}
+
+// InitializePayment initialize a payment
+func (p *Quikk) InitializePayment(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	return p.Charge(ctx, req)
 }

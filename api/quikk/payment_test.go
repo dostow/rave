@@ -2,14 +2,20 @@ package quikk
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/dostow/rave/api/models"
+	"github.com/google/uuid"
 )
 
+func uniqueid_from_uuid() string {
+	return strings.Replace(uuid.New().String(), "-", "", -1)
+}
 func mustParseTime(d string) time.Time {
 	t, _ := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", d)
 	return t
@@ -29,38 +35,11 @@ func Test_encrypt(t *testing.T) {
 		{
 			"",
 			args{
-				key:    "0f14b9acfedf4993ba73921e32de169b",
-				secret: "b79ffe917285678a9539320d3ab7b4a2",
+				key:    "488da317cae042d19e0a1afbb47200c1",
+				secret: "1c547740aa7daf4f412c4f81284dd3ab",
 				noww:   mustParseTime("Sun, 27 Feb 2022 10:41:43 UTC").Format("Mon, 02 Jan 2006 15:04:05 MST"),
 			},
-			`keyId="0f14b9acfedf4993ba73921e32de169b",algorithm="hmac-sha256",headers="x-aux-date",signature="DY%2By63zA9e8Ip3KgML3tAGcemKn7VnyMwbS3M%2FSvxeA%3D"`,
-		},
-		{
-			"",
-			args{
-				key:    "0f14b9acfedf4993ba73921e32de169b",
-				secret: "b79ffe917285678a9539320d3ab7b4a2",
-				noww:   mustParseTime("Sun, 27 Feb 2022 11:59:29 UTC").Format("Mon, 02 Jan 2006 15:04:05 MST"),
-			},
-			`keyId="0f14b9acfedf4993ba73921e32de169b",algorithm="hmac-sha256",headers="x-aux-date",signature="WjfGt89li3hpadb1uVbR4wYSP0qKAvdsT%2FEIipJN3lo%3D"`,
-		},
-		{
-			"",
-			args{
-				key:    "0f14b9acfedf4993ba73921e32de169b",
-				secret: "b79ffe917285678a9539320d3ab7b4a2",
-				noww:   mustParseTime("Sun, 27 Feb 2022 12:00:39 UTC").Format("Mon, 02 Jan 2006 15:04:05 MST"),
-			},
-			`keyId="0f14b9acfedf4993ba73921e32de169b",algorithm="hmac-sha256",headers="x-aux-date",signature="Sm74g%2FCrcomK5hDX27bXK4wdiHH0Ha7U6mpRGh6Urco%3D"`,
-		},
-		{
-			"",
-			args{
-				key:    "0f14b9acfedf4993ba73921e32de169b",
-				secret: "b79ffe917285678a9539320d3ab7b4a2",
-				noww:   mustParseTime("Fri, 22 Nov 2019 08:47:01 EAT").Format("Mon, 02 Jan 2006 15:04:05 MST"),
-			},
-			`keyId="0f14b9acfedf4993ba73921e32de169b",algorithm="hmac-sha256",headers="date x-custom",signature="FhJ%2FH0sMU3gcOAE%2FcUBjFaTYeUw3WQj9d8x2xGFVrNE%3D"`,
+			`keyId="488da317cae042d19e0a1afbb47200c1",algorithm="hmac-sha256",signature="c7kU4i%2FGMbr3MflWjBW%2F6bPu7w8gUBlMSiPnKlrsfbg%3D"`,
 		},
 	}
 	for _, tt := range tests {
@@ -95,8 +74,6 @@ func TestQuikk_Charge(t *testing.T) {
 				Config: models.Keys{
 					Public: "488da317cae042d19e0a1afbb47200c1",
 					Secret: "1c547740aa7daf4f412c4f81284dd3ab",
-					// Public: "0f14b9acfedf4993ba73921e32de169b",
-					// Secret: "b79ffe917285678a9539320d3ab7b4a2",
 				},
 			},
 			args{
@@ -105,7 +82,7 @@ func TestQuikk_Charge(t *testing.T) {
 					Customer: &models.Customer{Phonenumber: "254746378652"},
 					Currency: "566",
 					Amount:   "100",
-					TxRef:    fmt.Sprintf("100005%d", 1),
+					TxRef:    "199300",
 				},
 			},
 			nil,
@@ -116,7 +93,8 @@ func TestQuikk_Charge(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &Quikk{
 				ShortCode: tt.fields.ShortCode,
-				Config:    tt.fields.Config,
+				Public:    tt.fields.Config.Public,
+				Secret:    tt.fields.Config.Secret,
 			}
 			got, err := r.Charge(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
@@ -124,7 +102,107 @@ func TestQuikk_Charge(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
+				res2B, _ := json.Marshal(got)
+				fmt.Println(string(res2B))
 				t.Errorf("Quikk.Charge() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestQuikk_Refund(t *testing.T) {
+	type fields struct {
+		ShortCode string
+		Config    models.Keys
+		Staging   bool
+	}
+	type args struct {
+		ctx context.Context
+		req *models.PaymentRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *models.PaymentResponse
+		wantErr bool
+	}{
+		{
+			"",
+			fields{
+				ShortCode: "174379",
+				Config: models.Keys{
+					Public: "488da317cae042d19e0a1afbb47200c1",
+					Secret: "1c547740aa7daf4f412c4f81284dd3ab",
+				},
+			},
+			args{
+				context.Background(),
+				&models.PaymentRequest{
+					Customer: &models.Customer{Phonenumber: "254746378652"},
+					TxRef:    "6860-82751156-1",
+				},
+			},
+			nil,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Quikk{
+				ShortCode: tt.fields.ShortCode,
+				Public:    tt.fields.Config.Public,
+				Secret:    tt.fields.Config.Secret,
+				Staging:   tt.fields.Staging,
+			}
+			got, err := r.Refund(tt.args.ctx, tt.args.req)
+			res2B, _ := json.Marshal(got)
+			fmt.Println(string(res2B))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Quikk.Refund() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Quikk.Refund() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestQuikk_Payout(t *testing.T) {
+	type fields struct {
+		ShortCode string
+		Config    models.Keys
+		Staging   bool
+	}
+	type args struct {
+		ctx context.Context
+		req *models.PaymentRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *models.PaymentResponse
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Quikk{
+				ShortCode: tt.fields.ShortCode,
+				Public:    tt.fields.Config.Public,
+				Secret:    tt.fields.Config.Secret,
+				Staging:   tt.fields.Staging,
+			}
+			got, err := r.Payout(tt.args.ctx, tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Quikk.Payout() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Quikk.Payout() = %v, want %v", got, tt.want)
 			}
 		})
 	}

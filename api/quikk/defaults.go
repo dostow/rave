@@ -1,10 +1,10 @@
 package quikk
 
-import "github.com/dostow/rave/api/models"
-
 type Quikk struct {
-	ShortCode string `json:"short_code"`
-	Config    models.Keys
+	ShortCode string `json:"shortcode"`
+	Public    string `json:"public"`
+	Secret    string `json:"secret"`
+	PassKey   string `json:"passkey"`
 	Staging   bool
 }
 
@@ -13,5 +13,5 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-var stagingAPIURL = "https://tryapi.quikk.dev/v1/mpesa/charge"
-var productionAPIURL = "https://tryapi.quikk.dev/v1/mpesa/charge"
+var stagingAPIURL = "https://tryapi.quikk.dev/v1/mpesa"
+var productionAPIURL = "https://tryapi.quikk.dev/v1/mpesa"
