@@ -1,4 +1,4 @@
-VERSION := 1.0.28
+VERSION := 1.0.29
 NAME := $(shell echo $${PWD\#\#*/})
 TARGET := ./docker/$(NAME)
 all: clean build image scaletag scalepush
