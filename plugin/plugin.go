@@ -120,7 +120,7 @@ var linkparams = `{
 		},
 		"action": {
 			"type": "string",
-			"enum": ["createTransactionLink", "createTransferRecipient", "createTransfer", "deleteTransferRecipient", "validateTransfer"]
+			"enum": ["createTransactionLink", "createTransferRecipient", "createTransfer", "deleteTransferRecipient", "validateTransaction", "validateTransfer"]
 		},
 		"options": {
 			"type": "object",
@@ -200,6 +200,15 @@ var linkparams = `{
 						"payment_options", 
 						"customer"
 					],
+                  	"additionalProperties": false
+				},
+				{ 
+					"type": "object", 
+					"description": "verify transaction",
+					"properties": {
+						"tx_ref": {"type": "string"}
+					},
+					"required": ["tx_ref"],
                   	"additionalProperties": false
 				},
 				{ 

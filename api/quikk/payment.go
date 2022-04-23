@@ -160,6 +160,10 @@ func (r *Quikk) Payout(ctx context.Context, req *models.PaymentRequest) (*models
 	return r.doRequest("payouts", ct, reqBody)
 }
 
+func (p *Quikk) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 // InitializePayment initialize a payment
 func (p *Quikk) InitializePayment(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
 	return p.Charge(ctx, req)

@@ -32,6 +32,10 @@ type PaymentResult struct {
 	Data           *json.RawMessage `json:"data"`
 }
 
+func (p *SmartPay) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 // InitializePayment initialize a payment
 func (r *SmartPay) InitializePayment(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
 	reqBody := &PaymentRequest{

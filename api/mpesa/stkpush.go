@@ -2,6 +2,7 @@ package mpesa
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,6 +10,10 @@ import (
 	"github.com/dostow/rave/api/models"
 	mpesa_go "github.com/ndunyu/mpesa-go"
 )
+
+func (p *MPESA) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	return nil, errors.New("not implemented")
+}
 
 // InitializePayment initialize a payment
 func (p *MPESA) InitializePayment(ctx context.Context, req *models.PaymentRequest) (resp *models.PaymentResponse, err error) {

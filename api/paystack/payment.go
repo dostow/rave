@@ -14,16 +14,16 @@ import (
 
 // PaymentRequest payment request
 type PaymentRequest struct {
-	TxRef             string   `json:"reference"`
-	Amount            string   `json:"amount"`
-	Currency          string   `json:"currency"`
-	CallbackURL       string   `json:"callbask_url"`
-	Channels          []string `json:"channels"`
-	Plan              string   `json:"plan"`
-	Email             string   `json:"email"`
-	TransactionCharge string   `json:"transaction_charge"`
-	Subaccount        string   `json:"subaccount"`
-	SplitCode         string   `json:"split_code"`
+	TxRef             string   `json:"reference,omitempty"`
+	Amount            string   `json:"amount,omitempty"`
+	Currency          string   `json:"currency,omitempty"`
+	CallbackURL       string   `json:"callbask_url,omitempty"`
+	Channels          []string `json:"channels,omitempty"`
+	Plan              string   `json:"plan,omitempty"`
+	Email             string   `json:"email,omitempty"`
+	TransactionCharge string   `json:"transaction_charge,omitempty"`
+	Subaccount        string   `json:"subaccount,omitempty"`
+	SplitCode         string   `json:"split_code,omitempty"`
 	Metadata          string   `json:"metadata,omitempty"`
 }
 
@@ -44,6 +44,33 @@ type InitializePaymentResult struct {
 	Status  bool             `json:"status"`
 	Message string           `json:"message"`
 	Data    *json.RawMessage `json:"data"`
+}
+
+// ValidateTransaction checks status of a transaction
+func (p *Paystack) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	client := resty.New()
+	resp, err := client.R().
+		EnableTrace().
+		SetHeader("Authorization", "Bearer "+p.Config.Secret).
+		SetResult(&InitializePaymentResult{}).
+		SetError(&errorResponse{}).
+		Get(fmt.Sprintf("%s/transaction/verify/%s", url, req.TxRef))
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() == 200 {
+		result := resp.Result().(*InitializePaymentResult)
+		if result.Status {
+			rsp := InitializePaymentResultData{}
+			if err := json.Unmarshal(*result.Data, &rsp); err != nil {
+				return nil, err
+			}
+			return &models.PaymentResponse{Original: result.Data}, nil
+		}
+		return nil, errors.New(result.Message)
+	}
+	respBody := resp.Error().(*errorResponse)
+	return nil, errors.New(respBody.Message)
 }
 
 // InitializePayment initialize a payment
