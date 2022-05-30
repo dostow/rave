@@ -100,6 +100,9 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 			return &models.PaymentResponse{Link: "", Original: &raw}, nil
 		}
 		return nil, errors.New(result.Meta.Detail)
+	} else if resp.StatusCode() == 401 {
+		result := resp.Result().(*PaymentResult)
+		return nil, errors.New(fmt.Sprintf("%s - %s", resp.Status(), result.Meta.Status))
 	}
 	var apiErrors APIErrors
 	if err := json.Unmarshal(resp.Body(), &apiErrors); err == nil {

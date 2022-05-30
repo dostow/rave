@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -52,6 +53,10 @@ func Test_encrypt(t *testing.T) {
 }
 
 func TestQuikk_Charge(t *testing.T) {
+	public, _ := os.LookupEnv("QUIKK_PUBLIC")
+	secret, _ := os.LookupEnv("QUIKK_SECRET")
+	phone, _ := os.LookupEnv("QUIKK_PHONE")
+	shortCode, _ := os.LookupEnv("QUIKK_SHORT_CODE")
 	type fields struct {
 		ShortCode string
 		Config    models.Keys
@@ -70,16 +75,16 @@ func TestQuikk_Charge(t *testing.T) {
 		{
 			"",
 			fields{
-				ShortCode: "174379",
+				ShortCode: shortCode,
 				Config: models.Keys{
-					Public: "488da317cae042d19e0a1afbb47200c1",
-					Secret: "1c547740aa7daf4f412c4f81284dd3ab",
+					Public: public,
+					Secret: secret,
 				},
 			},
 			args{
 				context.Background(),
 				&models.PaymentRequest{
-					Customer: &models.Customer{Phonenumber: "254746378652"},
+					Customer: &models.Customer{Phonenumber: phone},
 					Currency: "566",
 					Amount:   "100",
 					TxRef:    "199300",
@@ -111,6 +116,10 @@ func TestQuikk_Charge(t *testing.T) {
 }
 
 func TestQuikk_Refund(t *testing.T) {
+	public, _ := os.LookupEnv("QUIKK_PUBLIC")
+	secret, _ := os.LookupEnv("QUIKK_SECRET")
+	phone, _ := os.LookupEnv("QUIKK_PHONE")
+	shortCode, _ := os.LookupEnv("QUIKK_SHORT_CODE")
 	type fields struct {
 		ShortCode string
 		Config    models.Keys
@@ -130,16 +139,16 @@ func TestQuikk_Refund(t *testing.T) {
 		{
 			"",
 			fields{
-				ShortCode: "174379",
+				ShortCode: shortCode,
 				Config: models.Keys{
-					Public: "488da317cae042d19e0a1afbb47200c1",
-					Secret: "1c547740aa7daf4f412c4f81284dd3ab",
+					Public: public,
+					Secret: secret,
 				},
 			},
 			args{
 				context.Background(),
 				&models.PaymentRequest{
-					Customer: &models.Customer{Phonenumber: "254746378652"},
+					Customer: &models.Customer{Phonenumber: phone},
 					TxRef:    "6860-82751156-1",
 				},
 			},
