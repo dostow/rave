@@ -30,9 +30,12 @@ type Attributes struct {
 	RecipientIDType   string    `json:"recipient_id_type,omitempty"`
 	RecipientIDNumber string    `json:"recipient_id_number,omitempty"`
 	OriginTxnId       string    `json:"origin_txn_id,omitempty"`
+	Q                 string    `json:"q,omitempty"`
+	On                string    `json:"on,omitempty"`
 }
 
 type Data struct {
+	ID         string     `json:"id,omitempty"`
 	Type       string     `json:"type"`
 	Attributes Attributes `json:"attributes"`
 }
@@ -102,11 +105,11 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 		return nil, errors.New(result.Meta.Detail)
 	} else if resp.StatusCode() == 401 {
 		result := resp.Result().(*PaymentResult)
-		return nil, errors.New(fmt.Sprintf("%s - %s", resp.Status(), result.Meta.Status))
+		return nil, fmt.Errorf("%s - %s", resp.Status(), result.Meta.Status)
 	}
 	var apiErrors APIErrors
 	if err := json.Unmarshal(resp.Body(), &apiErrors); err == nil {
-		return nil, errors.New(apiErrors.Errors[0].Detail)
+		return nil, fmt.Errorf("%s - %s", apiErrors.Errors[0].Title, apiErrors.Errors[0].Detail)
 	}
 	respBody := resp.Error().(*errorResponse)
 	return nil, errors.New(respBody.Message)
@@ -163,8 +166,19 @@ func (r *Quikk) Payout(ctx context.Context, req *models.PaymentRequest) (*models
 	return r.doRequest("payouts", ct, reqBody)
 }
 
-func (p *Quikk) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
-	return nil, errors.New("not implemented")
+func (r *Quikk) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
+	ct := time.Now()
+	reqBody := &PaymentRequest{
+		Data: Data{
+			Type: "search",
+			Attributes: Attributes{
+				ShortCode: r.ShortCode,
+				Q:         req.TxRef,
+				On:        "resource_id",
+			},
+		},
+	}
+	return r.doRequest("searches/transaction", ct, reqBody)
 }
 
 // InitializePayment initialize a payment

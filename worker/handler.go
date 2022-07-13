@@ -138,13 +138,17 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		callbackStore := gjson.Get(data, "StoreName").String()
 		callbackStoreID := gjson.Get(data, "Data.id").String()
 		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+		callbackData := map[string]interface{}{
+			"data":   resp.Original,
+			"status": "success",
+		}
 		if config.Callback != nil {
-			return postRequest(client, config, resp.Original)
+			return postRequest(client, config, callbackData)
 		} else {
 			_, err = c.Store.Update(
 				callbackStore,
 				callbackStoreID,
-				resp.Original,
+				callbackData,
 			)
 		}
 		return err
@@ -179,15 +183,18 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		}
 		callbackStore := gjson.Get(data, "StoreName").String()
 		callbackStoreID := gjson.Get(data, "Data.id").String()
-		result := map[string]interface{}{"status": "done", "link": resp.Link, "options": params.Options}
+		// result := map[string]interface{}{"status": "done", "link": resp.Link, "options": params.Options}
 		log.Debugf(`rave.UpdateStore("%s", "%s")`, gjson.Get(data, "StoreName").String(), gjson.Get(data, "Data.id").String())
+		callbackData := map[string]interface{}{
+			"data": resp,
+		}
 		if config.Callback != nil {
-			return postRequest(client, config, result)
+			return postRequest(client, config, callbackData)
 		} else {
 			_, err = c.Store.Update(
 				callbackStore,
 				callbackStoreID,
-				result,
+				callbackData,
 			)
 		}
 		return err

@@ -216,3 +216,65 @@ func TestQuikk_Payout(t *testing.T) {
 		})
 	}
 }
+
+func TestQuikk_ValidateTransaction(t *testing.T) {
+	public, _ := os.LookupEnv("QUIKK_PUBLIC")
+	secret, _ := os.LookupEnv("QUIKK_SECRET")
+	shortCode, _ := os.LookupEnv("QUIKK_SHORT_CODE")
+	type fields struct {
+		ShortCode string
+		Public    string
+		Secret    string
+		PassKey   string
+		Staging   bool
+	}
+	type args struct {
+		ctx context.Context
+		req *models.PaymentRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *models.PaymentResponse
+		wantErr bool
+	}{
+		{
+			"",
+			fields{
+				ShortCode: shortCode,
+				Public:    public,
+				Secret:    secret,
+				PassKey:   "",
+				Staging:   false,
+			},
+			args{
+				context.Background(),
+				&models.PaymentRequest{
+					TxRef: "29587-20460257-1",
+				},
+			},
+			nil,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Quikk{
+				ShortCode: tt.fields.ShortCode,
+				Public:    tt.fields.Public,
+				Secret:    tt.fields.Secret,
+				PassKey:   tt.fields.PassKey,
+				Staging:   tt.fields.Staging,
+			}
+			got, err := r.ValidateTransaction(tt.args.ctx, tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Quikk.ValidateTransaction() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Quikk.ValidateTransaction() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
