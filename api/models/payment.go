@@ -6,33 +6,33 @@ import (
 )
 
 type Meta struct {
-	User string `json:"user"`
+	User string `json:"user,omitempty"`
 	Type string `json:"type,omitempty"`
 }
 type Customer struct {
-	Email       string `json:"email"`
-	Phonenumber string `json:"phonenumber"`
-	Name        string `json:"name"`
+	Email       string `json:"email,omitempty"`
+	Phonenumber string `json:"phonenumber,omitempty"`
+	Name        string `json:"name,omitempty"`
 }
 
 type Customizations struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Logo        string `json:"logo"`
-	CallbackURL string `json:"callback_url"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Logo        string `json:"logo,omitempty"`
+	CallbackURL string `json:"callback_url,omitempty"`
 }
 
 type PaymentRequest struct {
-	TxRef          string          `json:"tx_ref"`
-	Amount         string          `json:"amount"`
-	Plan           string          `json:"plan"`
-	Currency       string          `json:"currency"`
-	RedirectURL    string          `json:"redirect_url"`
-	Narration      string          `json:"narration"`
-	Subaccount     string          `json:"subaccount"`
-	PaymentOptions string          `json:"payment_options"`
-	Meta           *Meta           `json:"meta"`
-	Customer       *Customer       `json:"customer"`
+	TxRef          string          `json:"tx_ref,omitempty"`
+	Amount         string          `json:"amount,omitempty"`
+	Plan           string          `json:"plan,omitempty"`
+	Currency       string          `json:"currency,omitempty"`
+	RedirectURL    string          `json:"redirect_url,omitempty"`
+	Narration      string          `json:"narration,omitempty"`
+	Subaccount     string          `json:"subaccount,omitempty"`
+	PaymentOptions string          `json:"payment_options,omitempty"`
+	Meta           *Meta           `json:"meta,omitempty"`
+	Customer       *Customer       `json:"customer,omitempty"`
 	Customizations *Customizations `json:"customizations,omitempty"`
 }
 

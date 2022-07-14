@@ -251,7 +251,7 @@ func TestQuikk_ValidateTransaction(t *testing.T) {
 			args{
 				context.Background(),
 				&models.PaymentRequest{
-					TxRef: "29587-20460257-1",
+					TxRef: "61137-62085768-1",
 				},
 			},
 			nil,
@@ -273,7 +273,7 @@ func TestQuikk_ValidateTransaction(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Quikk.ValidateTransaction() = %v, want %v", got, tt.want)
+				t.Errorf("Quikk.ValidateTransaction() = %v, want %v", fmt.Sprintf("%v", string(*got.Original)), tt.want)
 			}
 		})
 	}

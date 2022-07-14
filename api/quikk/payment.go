@@ -15,29 +15,30 @@ import (
 	conv "github.com/cstockton/go-conv"
 	"github.com/dostow/rave/api/models"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/uuid"
 )
 
 type Attributes struct {
-	Amount            int       `json:"amount,omitempty"`
-	CustomerType      string    `json:"customer_type,omitempty"`
-	CustomerNo        string    `json:"customer_no,omitempty"`
-	ShortCode         string    `json:"short_code,omitempty"`
-	PostedAt          time.Time `json:"posted_at,omitempty"`
-	Reference         string    `json:"reference,omitempty"`
-	ResourceID        string    `json:"resource_id,omitempty"`
-	RecipientNo       string    `json:"recipient_no,omitempty"`
-	RecipientType     string    `json:"recipient_type,omitempty"`
-	RecipientIDType   string    `json:"recipient_id_type,omitempty"`
-	RecipientIDNumber string    `json:"recipient_id_number,omitempty"`
-	OriginTxnId       string    `json:"origin_txn_id,omitempty"`
-	Q                 string    `json:"q,omitempty"`
-	On                string    `json:"on,omitempty"`
+	Amount            int        `json:"amount,omitempty"`
+	CustomerType      string     `json:"customer_type,omitempty"`
+	CustomerNo        string     `json:"customer_no,omitempty"`
+	ShortCode         string     `json:"short_code,omitempty"`
+	PostedAt          *time.Time `json:"posted_at,omitempty"`
+	Reference         string     `json:"reference,omitempty"`
+	ResourceID        string     `json:"resource_id,omitempty"`
+	RecipientNo       string     `json:"recipient_no,omitempty"`
+	RecipientType     string     `json:"recipient_type,omitempty"`
+	RecipientIDType   string     `json:"recipient_id_type,omitempty"`
+	RecipientIDNumber string     `json:"recipient_id_number,omitempty"`
+	OriginTxnId       string     `json:"origin_txn_id,omitempty"`
+	Q                 string     `json:"q,omitempty"`
+	On                string     `json:"on,omitempty"`
 }
 
 type Data struct {
 	ID         string     `json:"id,omitempty"`
-	Type       string     `json:"type"`
-	Attributes Attributes `json:"attributes"`
+	Type       string     `json:"type,omitempty"`
+	Attributes Attributes `json:"attributes,omitempty"`
 }
 
 // PaymentRequest payment request
@@ -83,6 +84,8 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 	ts := ct.UTC().Format("Mon, 02 Jan 2006 15:04:05 MST")
 	authorization := encrypt(r.Public, r.Secret, ts)
 	client := resty.New()
+	v, _ := json.Marshal(&reqBody)
+	fmt.Println(string(v))
 	resp, err := client.R().
 		EnableTrace().
 		SetHeader("content-type", "application/json").
@@ -128,7 +131,6 @@ func (r *Quikk) Charge(ctx context.Context, req *models.PaymentRequest) (*models
 				CustomerType: "msisdn",
 				CustomerNo:   strings.Replace(req.Customer.Phonenumber, "+", "", -1),
 				ShortCode:    r.ShortCode,
-				PostedAt:     ct,
 				Reference:    req.TxRef,
 			},
 		},
@@ -170,6 +172,7 @@ func (r *Quikk) ValidateTransaction(ctx context.Context, req *models.PaymentRequ
 	ct := time.Now()
 	reqBody := &PaymentRequest{
 		Data: Data{
+			ID:   uuid.NewString(),
 			Type: "search",
 			Attributes: Attributes{
 				ShortCode: r.ShortCode,
