@@ -100,6 +100,7 @@ func TestQuikk_Charge(t *testing.T) {
 				ShortCode: tt.fields.ShortCode,
 				Public:    tt.fields.Config.Public,
 				Secret:    tt.fields.Config.Secret,
+				URL:       stagingAPIURL,
 			}
 			got, err := r.Charge(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
@@ -163,6 +164,7 @@ func TestQuikk_Refund(t *testing.T) {
 				Public:    tt.fields.Config.Public,
 				Secret:    tt.fields.Config.Secret,
 				Staging:   tt.fields.Staging,
+				URL:       stagingAPIURL,
 			}
 			got, err := r.Refund(tt.args.ctx, tt.args.req)
 			res2B, _ := json.Marshal(got)
@@ -204,6 +206,7 @@ func TestQuikk_Payout(t *testing.T) {
 				Public:    tt.fields.Config.Public,
 				Secret:    tt.fields.Config.Secret,
 				Staging:   tt.fields.Staging,
+				URL:       stagingAPIURL,
 			}
 			got, err := r.Payout(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {

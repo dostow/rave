@@ -94,7 +94,7 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 		SetResult(&PaymentResult{}).
 		SetError(&errorResponse{}).
 		SetBody(reqBody).
-		Post(fmt.Sprintf("%s/%s", productionAPIURL, path))
+		Post(fmt.Sprintf("%s/%s", r.URL, path))
 	if err != nil {
 		return nil, err
 	}
