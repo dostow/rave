@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -111,7 +112,8 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 		return nil, fmt.Errorf("%s - %s", resp.Status(), result.Meta.Status)
 	}
 	var apiErrors APIErrors
-	if err := json.Unmarshal(resp.Body(), &apiErrors); err == nil {
+	b, _ := strconv.Unquote(string(resp.Body()))
+	if err := json.Unmarshal([]byte(b), &apiErrors); err == nil {
 		return nil, fmt.Errorf("%s - %s", apiErrors.Errors[0].Title, apiErrors.Errors[0].Detail)
 	}
 	respBody := resp.Error().(*errorResponse)
