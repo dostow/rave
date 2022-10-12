@@ -19,20 +19,20 @@ import (
 )
 
 type Attributes struct {
-	Amount            int        `json:"amount,omitempty"`
-	CustomerType      string     `json:"customer_type,omitempty"`
-	CustomerNo        string     `json:"customer_no,omitempty"`
-	ShortCode         string     `json:"short_code,omitempty"`
-	PostedAt          *time.Time `json:"posted_at,omitempty"`
-	Reference         string     `json:"reference,omitempty"`
-	ResourceID        string     `json:"resource_id,omitempty"`
-	RecipientNo       string     `json:"recipient_no,omitempty"`
-	RecipientType     string     `json:"recipient_type,omitempty"`
-	RecipientIDType   string     `json:"recipient_id_type,omitempty"`
-	RecipientIDNumber string     `json:"recipient_id_number,omitempty"`
-	OriginTxnId       string     `json:"origin_txn_id,omitempty"`
-	Q                 string     `json:"q,omitempty"`
-	On                string     `json:"on,omitempty"`
+	Amount            int       `json:"amount,omitempty"`
+	CustomerType      string    `json:"customer_type,omitempty"`
+	CustomerNo        string    `json:"customer_no,omitempty"`
+	ShortCode         string    `json:"short_code,omitempty"`
+	PostedAt          time.Time `json:"posted_at,omitempty"`
+	Reference         string    `json:"reference,omitempty"`
+	ResourceID        string    `json:"resource_id,omitempty"`
+	RecipientNo       string    `json:"recipient_no,omitempty"`
+	RecipientType     string    `json:"recipient_type,omitempty"`
+	RecipientIDType   string    `json:"recipient_id_type,omitempty"`
+	RecipientIDNumber string    `json:"recipient_id_number,omitempty"`
+	OriginTxnId       string    `json:"origin_txn_id,omitempty"`
+	Q                 string    `json:"q,omitempty"`
+	On                string    `json:"on,omitempty"`
 }
 
 type Data struct {
@@ -132,6 +132,7 @@ func (r *Quikk) Charge(ctx context.Context, req *models.PaymentRequest) (*models
 				CustomerNo:   strings.Replace(req.Customer.Phonenumber, "+", "", -1),
 				ShortCode:    r.ShortCode,
 				Reference:    req.TxRef,
+				PostedAt:     time.Now(),
 			},
 		},
 	}
