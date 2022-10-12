@@ -93,7 +93,7 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 		SetHeader("Authorization", authorization).
 		SetHeader("Date", ts).
 		SetResult(&PaymentResult{}).
-		SetError(&errorResponse{}).
+		// SetError(&APIErrors{}).
 		SetBody(reqBody).
 		Post(fmt.Sprintf("%s/%s", r.URL, path))
 	if err != nil {
@@ -113,11 +113,11 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 	}
 	var apiErrors APIErrors
 	b, _ := strconv.Unquote(string(resp.Body()))
-	if err := json.Unmarshal([]byte(b), &apiErrors); err == nil {
+	err = json.Unmarshal([]byte(b), &apiErrors)
+	if err == nil {
 		return nil, fmt.Errorf("%s - %s", apiErrors.Errors[0].Title, apiErrors.Errors[0].Detail)
 	}
-	respBody := resp.Error().(*errorResponse)
-	return nil, errors.New(respBody.Message)
+	return nil, err
 }
 
 // Charge initialize a payment and send an stk push
