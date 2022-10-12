@@ -15,7 +15,7 @@ type errorResponse struct {
 }
 
 var stagingAPIURL = "https://tryapi.quikk.dev/v1/mpesa"
-var productionAPIURL = "https://tryapi.quikk.dev/v1/mpesa"
+var productionAPIURL = "https://api.quikk.dev/v1/mpesa"
 
 func New(shortCode, public, secret, passKey string, staging bool) *Quikk {
 	url := productionAPIURL
