@@ -1,4 +1,4 @@
-package worker
+package handler
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-var secret = "FLWSECK_TEST-a923c443c50b874aa8c5c1e039560c02-X"
-var psecret = "sk_test_fecc4dcfad0b996c745e0b0c02a0077e533dc2a3"
+var secret = ""
+var psecret = ""
 
 func Test_doRave(t *testing.T) {
 	type args struct {
@@ -28,9 +28,9 @@ func Test_doRave(t *testing.T) {
 			args{
 				addonConfig: fmt.Sprintf(`{"keys": {"secret":"%s"}}`, secret),
 				addonParams: `{
-						"action": "createTransfer", 
+						"action": "createTransfer",
 						"options": {
-							"account": "account", 
+							"account": "account",
 							"bank": "bank"
 						}
 					}`,
@@ -128,7 +128,7 @@ func Test_createTransactionLink(t *testing.T) {
 			args{
 				addonConfig: fmt.Sprintf(`{"paystack": {"secret":"%s"}, "platform": "paystack"}`, psecret),
 				addonParams: `{
-						"action": "createTransactionLink", 
+						"action": "createTransactionLink",
 						"options": {
 							"tx_ref": "data.ref",
 							"plan": "data.plan",

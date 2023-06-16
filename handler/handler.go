@@ -1,4 +1,4 @@
-package worker
+package handler
 
 import (
 	// "context"
@@ -18,6 +18,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+type request struct {
+	Config  *Config `json:"config"`
+	Param   string  `json:"params"`
+	Data    string  `json:"data"`
+	ApiURL  string
+	Dry     bool
+	TraceID string `json:"traceID"`
+}
 type Callback struct {
 	URL     string                 `json:"url"`
 	Headers map[string]interface{} `json:"headers"`
@@ -73,26 +81,26 @@ type Data struct {
 	StoreTitle string
 }
 
-func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) error {
+func doRave(req *request) error {
+	traceID := req.TraceID
 	var err error
 	logger := log.WithField("trace", traceID)
 	defer logger.Trace("doRave").Stop(&err)
-	config := Config{}
 	ctx := context.Background()
 	client := pester.New()
 	client.Concurrency = 3
 	client.MaxRetries = 3
 	client.Backoff = pester.ExponentialBackoff
 	client.KeepLog = true
-	err = json.Unmarshal([]byte(addonConfig), &config)
-	if err != nil {
-		return err
-	}
+	config := req.Config
+	data := req.Data
 	params := Params{}
-	err = json.Unmarshal([]byte(addonParams), &params)
+	err = json.Unmarshal([]byte(req.Param), &params)
 	if err != nil {
 		return err
 	}
+	dry := req.Dry
+	apiURL := req.ApiURL
 	logger.Debugf("Received %s action", params.Action)
 	c := api.NewClient(apiURL, config.APIKey)
 	options := params.Options
@@ -108,7 +116,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 	switch params.Action {
 	case "validateTransaction":
 		params := &CreateTransactionParams{}
-		err = json.Unmarshal([]byte(addonParams), params)
+		err = json.Unmarshal([]byte(req.Param), params)
 		if err != nil {
 			return err
 		}
@@ -154,7 +162,7 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		return err
 	case "createTransactionLink":
 		params := &CreateTransactionParams{}
-		err = json.Unmarshal([]byte(addonParams), params)
+		err = json.Unmarshal([]byte(req.Param), params)
 		if err != nil {
 			return err
 		}
@@ -505,4 +513,40 @@ func doRave(apiURL, addonConfig, addonParams, data, traceID string, dry bool) er
 		}
 	}
 	return errors.New("not implemented")
+}
+
+type RaveHandler struct {
+	ApiURL string
+}
+
+func (h *RaveHandler) Name() string {
+	return "rave"
+}
+
+func (h *RaveHandler) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (h *RaveHandler) Handle(config, param, data, traceID string) (err error) {
+	// raw_req := fmt.Sprintf(`{"config":%s, "params": %s, "data": %s}`, config, param, data)
+	// err := plugin.ValidateByte([]byte(req))
+	// if err == nil {
+	reqConfig := Config{}
+	err = json.Unmarshal([]byte(config), &reqConfig)
+	if err != nil {
+		return fmt.Errorf("unmarshal config - %s", err)
+	}
+
+	params := Params{}
+	err = json.Unmarshal([]byte(param), &params)
+	if err != nil {
+		return fmt.Errorf("unmarshal param - %s", err)
+	}
+
+	req := request{
+		Data: data, TraceID: traceID, Param: param, Config: &reqConfig, ApiURL: h.ApiURL,
+	}
+	err = doRave(&req)
+	// }
+	return err
 }

@@ -1,27 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
-	"github.com/apex/log"
-	"github.com/apex/log/handlers/text"
-	"github.com/caarlos0/env"
-	"github.com/dostow/rave/worker"
+	"github.com/dostow/rave/handler"
+	"github.com/dostow/worker/pkg/worker"
 	"github.com/jaffee/commandeer"
 )
 
-// BUILD contains build id
-var BUILD string = "dev"
+var BUILD string = ""
 
 func main() {
-	log.SetLevel(log.DebugLevel)
-	log.SetHandler(text.New(os.Stderr))
-	w := worker.NewWorker(BUILD)
-	if err := env.Parse(w); err != nil {
-		log.Debugf("%+v", err)
-	}
+	command := os.Getenv("COMMAND")
+	apiURL := os.Getenv("DOSTOW_API")
+	w := worker.NewWorker(&handler.RaveHandler{ApiURL: apiURL})
+	w.Name = "push"
+	w.Build = BUILD
+	w.Command = command
+
 	err := commandeer.Run(w)
 	if err != nil {
-		log.Errorf("%+v", err)
+		fmt.Println(err)
 	}
 }
