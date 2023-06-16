@@ -171,14 +171,20 @@ func (r *Quikk) Payout(ctx context.Context, req *models.PaymentRequest) (*models
 
 func (r *Quikk) ValidateTransaction(ctx context.Context, req *models.PaymentRequest) (*models.PaymentResponse, error) {
 	ct := time.Now()
+	on := "resource_id"
+	q := req.ResourceID
+	if req.TxRef != "" {
+		on = "txn_id"
+		q = req.TxRef
+	}
 	reqBody := &PaymentRequest{
 		Data: Data{
 			ID:   uuid.NewString(),
 			Type: "search",
 			Attributes: Attributes{
 				ShortCode: r.ShortCode,
-				Q:         req.TxRef,
-				On:        "resource_id",
+				Q:         q,
+				On:        on,
 			},
 		},
 	}

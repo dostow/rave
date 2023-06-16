@@ -1,4 +1,4 @@
-package worker
+package handler
 
 import (
 	"encoding/json"
@@ -108,7 +108,7 @@ func Get(key string, s interface{}) (v interface{}, err error) {
 	return v, err
 }
 
-func postRequest(client *pester.Client, config Config, data interface{}) error {
+func postRequest(client *pester.Client, config *Config, data interface{}) error {
 	d, err := json.Marshal(data)
 	if err != nil {
 		return err

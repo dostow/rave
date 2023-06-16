@@ -24,6 +24,7 @@ type Customizations struct {
 
 type PaymentRequest struct {
 	TxRef          string          `json:"tx_ref,omitempty"`
+	ResourceID     string          `json:"resource_id,omitempty"`
 	Amount         string          `json:"amount,omitempty"`
 	Plan           string          `json:"plan,omitempty"`
 	Currency       string          `json:"currency,omitempty"`

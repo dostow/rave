@@ -5,16 +5,15 @@ go 1.17
 require (
 	github.com/RichardKnop/machinery v1.10.6
 	github.com/apex/log v1.9.0
-	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/cstockton/go-conv v1.0.0
-	github.com/dostow/worker v0.0.0-20220226171812-cc732a42aa9a
+	github.com/dostow/worker v0.0.0-20230509174215-b0799f66ca5a
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/jaffee/commandeer v0.5.0
 	github.com/ndunyu/mpesa-go v0.0.0-20210614181410-d89427b4dcad
 	github.com/osiloke/dostow-contrib v0.0.0-20210203194351-cd2a04aa4edb
 	github.com/sethgrid/pester v1.2.0
-	github.com/tidwall/gjson v1.14.0
+	github.com/tidwall/gjson v1.14.4
 )
 
 require (
@@ -22,6 +21,7 @@ require (
 	cloud.google.com/go/pubsub v1.10.0 // indirect
 	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae // indirect
+	github.com/aws/aws-lambda-go v1.40.0 // indirect
 	github.com/aws/aws-sdk-go v1.37.16 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
