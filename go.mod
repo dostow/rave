@@ -6,7 +6,7 @@ require (
 	github.com/RichardKnop/machinery v1.10.6
 	github.com/apex/log v1.9.0
 	github.com/cstockton/go-conv v1.0.0
-	github.com/dostow/worker v0.0.0-20230509174215-b0799f66ca5a
+	github.com/dostow/worker v0.0.0-20230930191834-9157b30a9ce6
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/jaffee/commandeer v0.5.0

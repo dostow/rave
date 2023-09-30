@@ -1,4 +1,4 @@
-VERSION := 1.0.29
+VERSION := 1.0.30
 NAME := $(shell echo $${PWD\#\#*/})
 TARGET := ./docker/$(NAME)
 all: clean build image scaletag scalepush
@@ -7,7 +7,7 @@ $(TARGET):
 build: $(TARGET)
 		@true
 image:
-	@docker build -t $(NAME):$(VERSION) ./docker
+	@docker build -t $(NAME):$(VERSION) .
 tag: 
 	@docker tag $(NAME):$(VERSION) docker.registry/$(NAME):$(VERSION)
 push: 
