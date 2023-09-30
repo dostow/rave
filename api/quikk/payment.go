@@ -2,13 +2,9 @@ package quikk
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 
@@ -70,22 +66,34 @@ type APIErrors struct {
 	} `json:"errors"`
 }
 
-func encrypt(key, secret, noww string) string {
-	to_encode := fmt.Sprintf("date: %s", noww)
-	hash := hmac.New(sha256.New, []byte(secret))
-	hash.Write([]byte(to_encode))
-	buf := hash.Sum(nil)
-	encoded := base64.StdEncoding.Strict().EncodeToString(buf)
-	url_encoded := url.QueryEscape(encoded)
-	return fmt.Sprintf(`keyId="%s",algorithm="hmac-sha256",signature="%s"`, key, url_encoded)
+type Quikk struct {
+	ShortCode string `json:"shortcode"`
+	Public    string `json:"public"`
+	Secret    string `json:"secret"`
+	PassKey   string `json:"passkey"`
+	URL       string `json:"url"`
+	Staging   bool
+}
+
+func New(shortCode, public, secret, passKey string, staging bool) *Quikk {
+	url := productionAPIURL
+	if staging {
+		url = stagingAPIURL
+	}
+	return &Quikk{
+		ShortCode: shortCode,
+		Public:    public,
+		Secret:    secret,
+		PassKey:   passKey,
+		URL:       url,
+		Staging:   staging,
+	}
 }
 
 func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*models.PaymentResponse, error) {
 	ts := ct.UTC().Format("Mon, 02 Jan 2006 15:04:05 MST")
 	authorization := encrypt(r.Public, r.Secret, ts)
 	client := resty.New()
-	v, _ := json.Marshal(&reqBody)
-	fmt.Println(string(v))
 	resp, err := client.R().
 		EnableTrace().
 		SetHeader("content-type", "application/json").

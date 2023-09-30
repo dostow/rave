@@ -6,17 +6,12 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/dostow/rave/api/models"
-	"github.com/google/uuid"
 )
 
-func uniqueid_from_uuid() string {
-	return strings.Replace(uuid.New().String(), "-", "", -1)
-}
 func mustParseTime(d string) time.Time {
 	t, _ := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", d)
 	return t
@@ -86,7 +81,7 @@ func TestQuikk_Charge(t *testing.T) {
 				&models.PaymentRequest{
 					Customer: &models.Customer{Phonenumber: phone},
 					Currency: "566",
-					Amount:   "100",
+					Amount:   "200",
 					TxRef:    "199300",
 				},
 			},
@@ -97,6 +92,7 @@ func TestQuikk_Charge(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &Quikk{
+				Staging:   true,
 				ShortCode: tt.fields.ShortCode,
 				Public:    tt.fields.Config.Public,
 				Secret:    tt.fields.Config.Secret,
