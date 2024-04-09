@@ -113,6 +113,9 @@ func (r *Quikk) doRequest(path string, ct time.Time, reqBody interface{}) (*mode
 	b := strings.Replace(string(resp.Body()), "\\", "", -1)
 	err = json.Unmarshal([]byte(b), &apiErrors)
 	if err == nil {
+		if len(apiErrors.Errors) == 0 {
+			return nil, fmt.Errorf("%s - %s", "failed", "charge failed")
+		}
 		return nil, fmt.Errorf("%s - %s", apiErrors.Errors[0].Title, apiErrors.Errors[0].Detail)
 	}
 	return nil, err
